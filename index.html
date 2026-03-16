@@ -18,6 +18,7 @@
     <div class="sidebar">
         <h3>القائمة</h3>
         <button onclick="showPage('revenue')">تسجيل الايراد</button>
+        <button onclick="showPage('debt')">المديونية 📝</button>
         <button onclick="showPage('logs')">لوج التعديلات</button>
         <button onclick="showPage('settings')">الإعدادات ⚙️</button>
         <button onclick="logout()" style="background: #e74c3c; margin-top: 40px;">تسجيل الخروج 🚪</button>
@@ -36,18 +37,41 @@
                 <div class="form-group"><label>الملاحظة</label><input type="text" id="note"></div>
                 <div class="form-group"><label>رفع ايصال PDF</label><input type="file" id="receipt"></div>
             </div>
-            <button class="btn-primary" onclick="saveData()">حفظ</button>
+            <button class="btn-primary" onclick="saveData()">حفظ الإيراد</button>
+            <button class="btn-secondary" onclick="showLogs()">لوج التعديلات</button>
+        </div>
+
+        <div id="debt" class="page">
+            <h2>تسجيل المديونية</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>التاريخ</label>
+                    <input type="date" id="debtDate">
+                </div>
+                <div class="form-group">
+                    <label>اسم العميل</label>
+                    <input type="text" id="debtClient" placeholder="اكتب اسم العميل">
+                </div>
+                <div class="form-group">
+                    <label>مبلغ المديونية</label>
+                    <input type="number" id="debtAmount" placeholder="أدخل المبلغ">
+                </div>
+                <div class="form-group">
+                    <label>الملاحظة</label>
+                    <input type="text" id="debtNote" placeholder="أي تفاصيل إضافية">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="saveDebt()">حفظ المديونية</button>
             <button class="btn-secondary" onclick="showLogs()">لوج التعديلات</button>
         </div>
 
         <div id="logs" class="page">
-            <h2>سجل التعديلات</h2>
+            <h2>سجل التعديلات (إيرادات ومديونيات)</h2>
             <div id="logContainer"></div>
         </div>
 
         <div id="settings" class="page">
             <h2>الإعدادات</h2>
-            
             <div class="settings-box">
                 <h3>🎨 مظهر النظام</h3>
                 <div class="form-group">
