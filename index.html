@@ -1,107 +1,90 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>Revenue System</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Revenue System</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="login-page" id="loginPage">
-
-<h2>تسجيل الدخول</h2>
-
-<input type="text" placeholder="اسم المستخدم">
-<input type="password" placeholder="كلمة المرور">
-
-<button onclick="login()">دخول</button>
-
+    <h2>تسجيل الدخول</h2>
+    <input type="text" placeholder="اسم المستخدم">
+    <input type="password" placeholder="كلمة المرور">
+    <button onclick="login()">دخول</button>
 </div>
-
-
 
 <div class="dashboard" id="dashboard">
+    <div class="sidebar">
+        <h3>القائمة</h3>
+        <button onclick="showPage('revenue')">تسجيل الايراد</button>
+        <button onclick="showPage('logs')">لوج التعديلات</button>
+    </div>
 
-<div class="sidebar">
+    <div class="content">
+        <div id="revenue" class="page">
+            <h2>تسجيل الايراد</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>السنة</label>
+                    <select id="year">
+                        <option>2026</option>
+                        <option>2027</option>
+                    </select>
+                </div>
 
-<h3>القائمة</h3>
+                <div class="form-group">
+                    <label>التاريخ</label>
+                    <input type="date" id="date">
+                </div>
 
-<button onclick="showPage('revenue')">تسجيل الايراد</button>
-<button onclick="showPage('logs')">لوج التعديلات</button>
+                <div class="form-group">
+                    <label>اسم الموظف</label>
+                    <select id="employee">
+                        <option>رفعت</option>
+                        <option>محمد</option>
+                        <option>حازم</option>
+                    </select>
+                </div>
 
-</div>
+                <div class="form-group">
+                    <label>الايراد</label>
+                    <input type="number" id="revenueValue">
+                </div>
 
+                <div class="form-group">
+                    <label>شحن الماكينه</label>
+                    <input type="number" id="machine">
+                </div>
 
-<div class="content">
+                <div class="form-group">
+                    <label>السحب</label>
+                    <input type="number" id="withdraw">
+                </div>
 
-<div id="revenue" class="page">
+                <div class="form-group">
+                    <label>الملاحظة</label>
+                    <input type="text" id="note">
+                </div>
 
-<h2>تسجيل الايراد</h2>
+                <div class="form-group">
+                    <label>رفع ايصال PDF</label>
+                    <input type="file" id="receipt">
+                </div>
+            </div>
 
-<label>السنة</label>
-<select id="year">
-<option>2026</option>
-<option>2027</option>
-</select>
+            <button class="btn-primary" onclick="saveData()">حفظ</button>
+            <button class="btn-secondary" onclick="showLogs()">لوج التعديلات</button>
+        </div>
 
-
-<label>التاريخ</label>
-<input type="date" id="date">
-
-
-<label>اسم الموظف</label>
-<select id="employee">
-
-<option>رفعت</option>
-<option>محمد</option>
-<option>حازم</option>
-
-</select>
-
-
-<label>الايراد</label>
-<input type="number" id="revenueValue">
-
-
-<label>شحن الماكينه</label>
-<input type="number" id="machine">
-
-
-<label>السحب</label>
-<input type="number" id="withdraw">
-
-
-<label>الملاحظة</label>
-<input type="text" id="note">
-
-
-<label>رفع ايصال PDF</label>
-<input type="file" id="receipt">
-
-
-<button onclick="saveData()">حفظ</button>
-
-<button onclick="showLogs()">لوج</button>
-
-</div>
-
-
-
-<div id="logs" class="page">
-
-<h2>سجل التعديلات</h2>
-
-<div id="logContainer"></div>
-
-</div>
-
-
-</div>
-
+        <div id="logs" class="page">
+            <h2>سجل التعديلات</h2>
+            <div id="logContainer"></div>
+        </div>
+    </div>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
