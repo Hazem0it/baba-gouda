@@ -20,6 +20,7 @@
         <button onclick="showPage('revenue')">تسجيل الايراد</button>
         <button onclick="showPage('logs')">لوج التعديلات</button>
         <button onclick="showPage('settings')">الإعدادات ⚙️</button>
+        <button onclick="logout()" style="background: #e74c3c; margin-top: 40px;">تسجيل الخروج 🚪</button>
     </div>
 
     <div class="content">
@@ -69,6 +70,11 @@
                     <input type="password" id="newPassword">
                 </div>
                 <button class="btn-primary" onclick="addUser()">حفظ المستخدم</button>
+            </div>
+
+            <div class="settings-box">
+                <h3>👥 المستخدمين المسجلين بالنظام</h3>
+                <div id="usersListContainer"></div>
             </div>
         </div>
 
