@@ -1,24 +1,138 @@
-<button onclick="showPage('home')">الرئيسية 🏠</button>
-<button onclick="showPage('revenue')">تسجيل الايراد</button>
-<button onclick="showPage('debt')">المديونية 📝</button>
-<div id="home" class="page">
-    <h2>الصفحة الرئيسية - ملخص المديونيات</h2>
-    <div class="stats-grid">
-        <div class="stat-card"><h3>رفعت</h3><p id="total-refaat">جاري التحميل...</p></div>
-        <div class="stat-card"><h3>محمد</h3><p id="total-mohamed">جاري التحميل...</p></div>
-        <div class="stat-card"><h3>محمود</h3><p id="total-mahmoud">جاري التحميل...</p></div>
-        <div class="stat-card"><h3>حازم</h3><p id="total-hazem">جاري التحميل...</p></div>
-    </div>
-    <button class="btn-primary" onclick="loadTotals()">تحديث الأرقام 🔄</button>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>نظام الإيرادات والمديونية</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-page" id="loginPage">
+    <h2>تسجيل الدخول</h2>
+    <input type="text" id="loginUser" placeholder="اسم المستخدم">
+    <input type="password" id="loginPass" placeholder="كلمة المرور">
+    <button onclick="login()">دخول</button>
 </div>
 
-<div class="form-group">
-    <label>اسم الموظف</label>
-    <select id="debtClient">
-        <option value="">اختر الموظف...</option>
-        <option value="رفعت">رفعت</option>
-        <option value="محمد">محمد</option>
-        <option value="محمود">محمود</option>
-        <option value="حازم">حازم</option>
-    </select>
+<div class="dashboard" id="dashboard">
+    <div class="sidebar">
+        <h3>القائمة</h3>
+        <button onclick="showPage('home')">الرئيسية 🏠</button>
+        <button onclick="showPage('revenue')">تسجيل الايراد 💰</button>
+        <button onclick="showPage('debt')">المديونية 📝</button>
+        <button onclick="showPage('logs')">لوج التعديلات 📊</button>
+        <button onclick="showPage('settings')">الإعدادات ⚙️</button>
+        <button onclick="logout()" style="background: #e74c3c; margin-top: 40px;">تسجيل الخروج 🚪</button>
+    </div>
+
+    <div class="content">
+        <div id="home" class="page">
+            <h2>الصفحة الرئيسية - ملخص المديونيات</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>رفعت</h3>
+                    <p id="total-refaat">جاري التحميل...</p>
+                </div>
+                <div class="stat-card">
+                    <h3>محمد</h3>
+                    <p id="total-mohamed">جاري التحميل...</p>
+                </div>
+                <div class="stat-card">
+                    <h3>محمود</h3>
+                    <p id="total-mahmoud">جاري التحميل...</p>
+                </div>
+                <div class="stat-card">
+                    <h3>حازم</h3>
+                    <p id="total-hazem">جاري التحميل...</p>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="loadTotals()" style="margin-top: 20px;">تحديث الأرقام 🔄</button>
+        </div>
+
+        <div id="revenue" class="page">
+            <h2>تسجيل الايراد</h2>
+            <div class="form-grid">
+                <div class="form-group"><label>السنة</label><select id="year"><option>2026</option><option>2027</option></select></div>
+                <div class="form-group"><label>التاريخ</label><input type="date" id="date"></div>
+                <div class="form-group"><label>اسم الموظف</label><select id="employee"><option>رفعت</option><option>محمد</option><option>حازم</option><option>محمود</option></select></div>
+                <div class="form-group"><label>الايراد</label><input type="number" id="revenueValue"></div>
+                <div class="form-group"><label>شحن الماكينه</label><input type="number" id="machine"></div>
+                <div class="form-group"><label>السحب</label><input type="number" id="withdraw"></div>
+                <div class="form-group"><label>الملاحظة</label><input type="text" id="note"></div>
+                <div class="form-group"><label>رفع ايصال PDF</label><input type="file" id="receipt"></div>
+            </div>
+            <button class="btn-primary" onclick="saveData()">حفظ الإيراد</button>
+        </div>
+
+        <div id="debt" class="page">
+            <h2>تسجيل المديونية</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>التاريخ</label>
+                    <input type="date" id="debtDate">
+                </div>
+                <div class="form-group">
+                    <label>اسم الموظف</label>
+                    <select id="debtClient">
+                        <option value="">اختر الموظف...</option>
+                        <option value="رفعت">رفعت</option>
+                        <option value="محمد">محمد</option>
+                        <option value="محمود">محمود</option>
+                        <option value="حازم">حازم</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>مبلغ المديونية</label>
+                    <input type="number" id="debtAmount" placeholder="أدخل المبلغ">
+                </div>
+                <div class="form-group">
+                    <label>الملاحظة</label>
+                    <input type="text" id="debtNote" placeholder="أي تفاصيل إضافية">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="saveDebt()">حفظ المديونية</button>
+        </div>
+
+        <div id="logs" class="page">
+            <h2>سجل التعديلات (إيرادات ومديونيات)</h2>
+            <div id="logContainer"></div>
+        </div>
+
+        <div id="settings" class="page">
+            <h2>الإعدادات</h2>
+            <div class="settings-box">
+                <h3>🎨 مظهر النظام</h3>
+                <div class="form-group">
+                    <label>اختر الستايل:</label>
+                    <select id="themeSelect" onchange="changeTheme()">
+                        <option value="light">الوضع الفاتح (الافتراضي)</option>
+                        <option value="dark">الوضع الداكن (Dark Mode)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-box">
+                <h3>🔒 إضافة / تعديل مستخدم</h3>
+                <div class="form-group">
+                    <label>اسم المستخدم الجديد</label>
+                    <input type="text" id="newUsername">
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور الجديدة</label>
+                    <input type="password" id="newPassword">
+                </div>
+                <button class="btn-primary" onclick="addUser()">حفظ المستخدم</button>
+            </div>
+
+            <div class="settings-box">
+                <h3>👥 المستخدمين المسجلين بالنظام</h3>
+                <div id="usersListContainer"></div>
+            </div>
+        </div>
+
+    </div>
 </div>
+
+<script src="script.js"></script>
+</body>
+</html>
