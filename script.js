@@ -1,10 +1,7 @@
-// ⚠️ ضع الرابط الذي نسخته من جوجل هنا بين علامتي التنصيص
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXX4mIc2iEnbUDYDUMqYX6mY1gIJD92x_zZprDD8xi_doxNJj115oaxL0ncDlr2LCcXg/exec"; 
+// ⚠️ ضع الرابط الذي نسخته من جوجل هنا
+const GOOGLE_SCRIPT_URL = "ضع_الرابط_هنا"; 
 
-// تعريف مصفوفة السجل (ستكون فارغة في البداية وسيتم جلبها من جوجل)
 let logs = [];
-
-// استدعاء المستخدمين والستايل من ذاكرة المتصفح
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
 let currentTheme = localStorage.getItem('systemTheme') || 'light';
 applyTheme(currentTheme);
@@ -13,7 +10,7 @@ applyTheme(currentTheme);
 // نظام تسجيل الخروج التلقائي
 // ==========================================
 let idleTimeout;
-const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; // ساعتين بالميلي ثانية
+const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; // ساعتين
 
 function resetIdleTimer() {
     if (localStorage.getItem('loggedInUser')) {
@@ -23,7 +20,7 @@ function resetIdleTimer() {
 }
 
 function autoLogout() {
-    alert("⏳ تم تسجيل الخروج تلقائياً نظراً لعدم وجود نشاط لمدة ساعتين.");
+    alert("⏳ تم تسجيل الخروج تلقائياً نظراً لعدم وجود نشاط.");
     logout();
 }
 
@@ -33,7 +30,7 @@ document.addEventListener('click', resetIdleTimer);
 document.addEventListener('scroll', resetIdleTimer);
 
 // ==========================================
-// أحداث عند تحميل الصفحة
+// الدخول والتنقل
 // ==========================================
 window.onload = function() {
     let loggedInUser = localStorage.getItem('loggedInUser');
@@ -41,15 +38,12 @@ window.onload = function() {
         document.getElementById("loginPage").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
         showPage("home");
-        loadTotals(); // جلب الأرقام واللوج من جوجل
+        loadTotals();
         resetIdleTimer();
     }
     renderUsersList();
 }
 
-// ==========================================
-// نظام الدخول والخروج والتنقل
-// ==========================================
 function login() {
     let user = document.getElementById("loginUser").value;
     let pass = document.getElementById("loginPass").value;
@@ -81,20 +75,15 @@ function showPage(page) {
 }
 
 // ==========================================
-// جلب البيانات من جوجل (المجاميع + اللوج)
+// جلب البيانات (الرئيسية واللوج)
 // ==========================================
 async function loadTotals() {
-    if(!GOOGLE_SCRIPT_URL.startsWith("http")) {
-        console.warn("⚠️ لم يتم وضع رابط جوجل شيت.");
-        return;
-    }
-    
+    if(!GOOGLE_SCRIPT_URL.startsWith("http")) return;
     try {
         let response = await fetch(GOOGLE_SCRIPT_URL, { redirect: "follow" });
         let result = await response.json();
         
         if(result.status === "success") {
-            // تحديث مربعات الأرقام في الرئيسية
             document.getElementById("total-refaat").innerText = result.data["رفعت"];
             document.getElementById("total-mohamed").innerText = result.data["محمد"];
             document.getElementById("total-mahmoud").innerText = result.data["محمود"];
@@ -102,19 +91,67 @@ async function loadTotals() {
             let totalAll = document.getElementById("total-all");
             if(totalAll) totalAll.innerText = result.data["المجموع"];
 
-            // سحب السجل (اللوج) من جوجل وحفظه في الموقع
             logs = result.logs || []; 
-        } else {
-            console.error("خطأ من الشيت: " + result.message);
         }
     } catch (error) {
-        console.error("خطأ في الاتصال بالسيرفر:", error);
+        console.error("خطأ في الاتصال:", error);
     }
 }
 
 // ==========================================
-// تسجيل الإيراد والمديونية
+// نظام الإيراد المتقدم (استدعاء وحفظ ورفع ملف)
 // ==========================================
+function getBase64(file) {
+   return new Promise((resolve, reject) => {
+     const reader = new FileReader();
+     reader.readAsDataURL(file);
+     reader.onload = () => resolve(reader.result.split(',')[1]);
+     reader.onerror = error => reject(error);
+   });
+}
+
+async function checkExistingData() {
+    let year = document.getElementById("year").value;
+    let date = document.getElementById("date").value;
+    let employee = document.getElementById("employee").value;
+    let statusText = document.getElementById("checkStatus");
+
+    if(date && employee) {
+        statusText.innerText = "⏳ جاري فحص السجلات السابقة...";
+        statusText.style.color = "#f39c12";
+
+        let dataToSend = { action: "checkRevenue", year: year, date: date, employee: employee };
+
+        try {
+            let response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                redirect: "follow",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(dataToSend)
+            });
+            let result = await response.json();
+
+            if(result.status === "success") {
+                statusText.innerText = "✅ تم جلب البيانات السابقة لهذا اليوم.. يمكنك تعديلها.";
+                statusText.style.color = "#2ecc71";
+                document.getElementById("revenueValue").value = result.data.revenue || "";
+                document.getElementById("machine").value = result.data.machine || "";
+                document.getElementById("withdraw").value = result.data.withdraw || "";
+                document.getElementById("note").value = result.data.note || "";
+            } else {
+                statusText.innerText = "✨ هذا اليوم جديد ولم يُسجل فيه شيء بعد لهذا الموظف.";
+                statusText.style.color = "#3498db";
+                document.getElementById("revenueValue").value = "";
+                document.getElementById("machine").value = "";
+                document.getElementById("withdraw").value = "";
+                document.getElementById("note").value = "";
+            }
+        } catch(error) {
+            statusText.innerText = "";
+        }
+    }
+}
+
 async function saveData() {
     let year = document.getElementById("year").value;
     let date = document.getElementById("date").value;
@@ -123,18 +160,37 @@ async function saveData() {
     let machine = document.getElementById("machine").value;
     let withdraw = document.getElementById("withdraw").value;
     let note = document.getElementById("note").value;
+    
+    let fileInput = document.getElementById("receipt");
+    let file = fileInput.files[0];
+    let fileBase64 = null;
+    let fileName = null;
+    let fileMimeType = null;
 
-    if(!date || !employee || !revenue) {
-        alert("⚠️ يرجى إدخال التاريخ واسم الموظف والإيراد!");
+    if(!date || !employee) {
+        alert("⚠️ يرجى إدخال التاريخ واسم الموظف على الأقل!");
         return;
     }
 
-    let dataToSend = { action: "addRevenue", year: year, date: date, employee: employee, revenue: revenue, machine: machine, withdraw: withdraw, note: note };
-    
     let btn = document.querySelector("#revenue .btn-primary");
     let originalText = btn.innerText;
-    btn.innerText = "⏳ جاري الحفظ في السحابة...";
+    
+    if (file) {
+        btn.innerText = "⏳ جاري التجهيز ورفع الإيصال...";
+        fileName = file.name;
+        fileMimeType = file.type;
+        fileBase64 = await getBase64(file);
+    } else {
+        btn.innerText = "⏳ جاري الحفظ في السحابة...";
+    }
+    
     btn.disabled = true;
+
+    let dataToSend = { 
+        action: "addRevenue", year: year, date: date, employee: employee, 
+        revenue: revenue, machine: machine, withdraw: withdraw, note: note,
+        fileName: fileName, fileMimeType: fileMimeType, fileBase64: fileBase64
+    };
 
     try {
         let response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -146,16 +202,18 @@ async function saveData() {
         
         let result = await response.json();
         if(result.status === "success") {
-            alert("تم حفظ الإيراد بنجاح ✅");
+            alert("تم حفظ وتحديث الإيراد بنجاح ✅");
             
-            // تصفير الخانات
             document.getElementById("date").value = "";
+            document.getElementById("employee").value = "";
             document.getElementById("revenueValue").value = "";
             document.getElementById("machine").value = "";
             document.getElementById("withdraw").value = "";
             document.getElementById("note").value = "";
+            document.getElementById("receipt").value = "";
+            document.getElementById("checkStatus").innerText = "";
 
-            loadTotals(); // تحديث اللوج والمجاميع فوراً من جوجل
+            loadTotals(); 
         } else {
             alert("❌ فشل الحفظ: " + result.message);
         }
@@ -166,6 +224,9 @@ async function saveData() {
     btn.disabled = false;
 }
 
+// ==========================================
+// المديونية
+// ==========================================
 async function saveDebt() {
     let date = document.getElementById("debtDate").value;
     let client = document.getElementById("debtClient").value; 
@@ -196,13 +257,12 @@ async function saveDebt() {
         if(result.status === "success") {
             alert("تم حفظ المديونية بنجاح ✅");
             
-            // تصفير الخانات
             document.getElementById("debtDate").value = "";
             document.getElementById("debtClient").value = "";
             document.getElementById("debtAmount").value = "";
             document.getElementById("debtNote").value = "";
 
-            loadTotals(); // تحديث الأرقام واللوج فوراً من جوجل
+            loadTotals(); 
         } else {
             alert("❌ فشل الحفظ: " + result.message);
         }
@@ -214,14 +274,13 @@ async function saveDebt() {
 }
 
 // ==========================================
-// عرض السجل (اللوج)
+// اللوج وإعدادات المستخدم
 // ==========================================
 function showLogs() {
     showPage("logs");
     let container = document.getElementById("logContainer");
     container.innerHTML = "";
     
-    // عرض الأحدث أولاً
     let reversedLogs = [...logs].reverse();
 
     if(reversedLogs.length === 0) {
@@ -238,10 +297,10 @@ function showLogs() {
             displayDate = new Date(l.date).toLocaleDateString('ar-EG');
         }
 
-        if (l.type === "إيراد") {
+        if (String(l.type).includes("إيراد")) {
             div.style.borderRight = "5px solid #2ecc71";
             div.innerHTML = `
-                <strong style="color: #2ecc71;">[إيراد]</strong><br>
+                <strong style="color: #2ecc71;">[${l.type}]</strong><br>
                 التاريخ: ${displayDate}<br>
                 الموظف: ${l.name}<br>
                 الايراد: ${l.amount} | السحب: ${l.withdraw || "0"}<br>
@@ -253,7 +312,7 @@ function showLogs() {
             div.innerHTML = `
                 <strong style="color: #e74c3c;">[مديونية]</strong><br>
                 التاريخ: ${displayDate}<br>
-                الموظف: ${l.name}<br>
+                الاسم: ${l.name}<br>
                 المبلغ: ${l.amount}<br>
                 الملاحظة: ${l.note}<br>
                 <small style="color:gray;">وقت التسجيل: ${l.time}</small>
@@ -263,9 +322,6 @@ function showLogs() {
     });
 }
 
-// ==========================================
-// إدارة المستخدمين والستايل
-// ==========================================
 function addUser() {
     let newUser = document.getElementById("newUsername").value;
     let newPass = document.getElementById("newPassword").value;
