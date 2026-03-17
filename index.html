@@ -33,7 +33,6 @@
                     <h3>المجموع الكلي 💰</h3>
                     <p id="total-all" style="color: #f39c12; font-size: 28px;">جاري التحميل...</p>
                 </div>
-
                 <div class="stat-card">
                     <h3>رفعت</h3>
                     <p id="total-refaat">جاري التحميل...</p>
@@ -57,16 +56,52 @@
         <div id="revenue" class="page">
             <h2>تسجيل الايراد</h2>
             <div class="form-grid">
-                <div class="form-group"><label>السنة</label><select id="year"><option>2026</option><option>2027</option></select></div>
-                <div class="form-group"><label>التاريخ</label><input type="date" id="date"></div>
-                <div class="form-group"><label>اسم الموظف</label><select id="employee"><option>رفعت</option><option>محمد</option><option>حازم</option><option>محمود</option></select></div>
-                <div class="form-group"><label>الايراد</label><input type="number" id="revenueValue"></div>
-                <div class="form-group"><label>شحن الماكينه</label><input type="number" id="machine"></div>
-                <div class="form-group"><label>السحب</label><input type="number" id="withdraw"></div>
-                <div class="form-group"><label>الملاحظة</label><input type="text" id="note"></div>
-                <div class="form-group"><label>رفع ايصال PDF</label><input type="file" id="receipt"></div>
+                <div class="form-group">
+                    <label>السنة</label>
+                    <select id="year" onchange="checkExistingData()">
+                        <option>2026</option>
+                        <option>2027</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>التاريخ</label>
+                    <input type="date" id="date" onchange="checkExistingData()">
+                </div>
+                <div class="form-group">
+                    <label>اسم الموظف</label>
+                    <select id="employee" onchange="checkExistingData()">
+                        <option value="">اختر الموظف...</option>
+                        <option>رفعت</option>
+                        <option>محمد</option>
+                        <option>حازم</option>
+                        <option>عمر</option>
+                        <option>ساره</option>
+                        <option>ريهام</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>الايراد</label>
+                    <input type="number" id="revenueValue" placeholder="قيمة الإيراد">
+                </div>
+                <div class="form-group">
+                    <label>شحن الماكينه</label>
+                    <input type="number" id="machine">
+                </div>
+                <div class="form-group">
+                    <label>السحب</label>
+                    <input type="number" id="withdraw">
+                </div>
+                <div class="form-group">
+                    <label>الملاحظة</label>
+                    <input type="text" id="note">
+                </div>
+                <div class="form-group">
+                    <label>رفع ايصال PDF أو صورة</label>
+                    <input type="file" id="receipt" accept=".pdf,image/*">
+                </div>
             </div>
-            <button class="btn-primary" onclick="saveData()">حفظ الإيراد</button>
+            <button class="btn-primary" onclick="saveData()">حفظ الإيراد وتحديث البيانات</button>
+            <p id="checkStatus" style="color: #e74c3c; font-weight: bold; font-size: 14px; margin-top: 10px;"></p>
         </div>
 
         <div id="debt" class="page">
@@ -99,7 +134,7 @@
         </div>
 
         <div id="logs" class="page">
-            <h2>سجل التعديلات (إيرادات ومديونيات)</h2>
+            <h2>سجل التعديلات (من جوجل شيت)</h2>
             <div id="logContainer"></div>
         </div>
 
