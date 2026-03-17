@@ -1,5 +1,5 @@
 // ضع الرابط الذي نسخته من جوجل هنا بين علامتي التنصيص
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxszRW2bc1lOL2jMTFdSep8fOzEERWOV9LlpdHHeyCityrYTPaKWB3TalpaLT1xRiV1RQ/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykSSRrEsy1NWyPeHOTJqtziIxxK1ezYqvUMR3Ky9i1f3kRFrOTb0YJs_Iswz9adMlRcg/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
@@ -145,6 +145,8 @@ async function loadTotals() {
             document.getElementById("total-mohamed").innerText = result.data["محمد"];
             document.getElementById("total-mahmoud").innerText = result.data["محمود"];
             document.getElementById("total-hazem").innerText = result.data["حازم"];
+            // إضافة سطر المجموع الكلي
+            document.getElementById("total-all").innerText = result.data["المجموع"];
         }
     } catch (error) {
         console.error("خطأ في جلب البيانات:", error);
