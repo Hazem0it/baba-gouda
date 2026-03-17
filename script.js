@@ -1,5 +1,5 @@
 // ضع الرابط الذي نسخته من جوجل هنا بين علامتي التنصيص
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykSSRrEsy1NWyPeHOTJqtziIxxK1ezYqvUMR3Ky9i1f3kRFrOTb0YJs_Iswz9adMlRcg/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2-jee42KDgNnXOS_Xfp0SREzdXDd5QAfYRs_Bnd_8GaWYAA7iqNhrbwbYzkFZQM2MkA/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
@@ -153,7 +153,9 @@ async function loadTotals() {
     }
 }
 
-function saveData() {
+// دالة حفظ الإيراد الجديدة لترسل لجوجل شيت
+async function saveData() {
+    let year = document.getElementById("year").value;
     let date = document.getElementById("date").value;
     let employee = document.getElementById("employee").value;
     let revenue = document.getElementById("revenueValue").value;
@@ -161,29 +163,24 @@ function saveData() {
     let withdraw = document.getElementById("withdraw").value;
     let note = document.getElementById("note").value;
 
-    let log = {
-        type: "إيراد", 
-        date, employee, revenue, machine, withdraw, note,
-        time: new Date().toLocaleString()
-    }
-
-    logs.push(log);
-    alert("تم حفظ الإيراد بنجاح ✅");
-}
-
-async function saveDebt() {
-    let date = document.getElementById("debtDate").value;
-    let client = document.getElementById("debtClient").value; 
-    let amount = document.getElementById("debtAmount").value;
-    let note = document.getElementById("debtNote").value;
-
-    if(!date || !client || !amount) {
-        alert("⚠️ يرجى إدخال التاريخ، واختيار الموظف، والمبلغ!");
+    if(!date || !employee || !revenue) {
+        alert("⚠️ يرجى إدخال التاريخ واسم الموظف وقيمة الإيراد على الأقل!");
         return;
     }
 
-    let dataToSend = { action: "addDebt", date: date, employee: client, amount: amount, note: note };
-    let btn = document.querySelector("#debt .btn-primary");
+    // تجهيز البيانات للإرسال
+    let dataToSend = {
+        action: "addRevenue",
+        year: year,       // نرسل السنة لكي يختار الشيت الصحيح (2026 أو 2027)
+        date: date,
+        employee: employee,
+        revenue: revenue,
+        machine: machine,
+        withdraw: withdraw,
+        note: note
+    };
+
+    let btn = document.querySelector("#revenue .btn-primary");
     let originalText = btn.innerText;
     btn.innerText = "⏳ جاري الإرسال لجوجل شيت...";
     btn.disabled = true;
@@ -197,28 +194,30 @@ async function saveDebt() {
         let result = await response.json();
 
         if(result.status === "success") {
-            alert("تم حفظ المديونية في جوجل شيت بنجاح ✅");
+            // لن تظهر هذه الرسالة إلا إذا أكد جوجل أنه تم الحفظ بنجاح
+            alert("تم حفظ الإيراد في جوجل شيت بنجاح ✅");
+            
             logs.push({
-                type: "مديونية", date: date, client: client, amount: amount, note: note, time: new Date().toLocaleString()
+                type: "إيراد", date, employee, revenue, machine, withdraw, note, time: new Date().toLocaleString()
             });
             
-            document.getElementById("debtDate").value = "";
-            document.getElementById("debtClient").value = "";
-            document.getElementById("debtAmount").value = "";
-            document.getElementById("debtNote").value = "";
-            
-            loadTotals();
+            // تصفير الخانات
+            document.getElementById("date").value = "";
+            document.getElementById("revenueValue").value = "";
+            document.getElementById("machine").value = "";
+            document.getElementById("withdraw").value = "";
+            document.getElementById("note").value = "";
         } else {
-            alert("❌ حدث خطأ أثناء الحفظ في جوجل شيت.");
+            // إظهار سبب الخطأ القادم من جوجل
+            alert("❌ خطأ من جوجل شيت: " + result.message);
         }
     } catch(error) {
-        alert("❌ خطأ في الاتصال. تأكد من أنك قمت بوضع رابط السكربت الصحيح.");
+        alert("❌ لم يتم الحفظ! تأكد من الاتصال بالإنترنت أو أن رابط السكربت صحيح.");
     }
 
     btn.innerText = originalText;
     btn.disabled = false;
 }
-
 function showLogs() {
     showPage("logs");
     let container = document.getElementById("logContainer");
