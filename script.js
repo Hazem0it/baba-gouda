@@ -5,12 +5,41 @@ let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" 
 let currentTheme = localStorage.getItem('systemTheme') || 'light';
 applyTheme(currentTheme);
 
+// ==========================================
+// نظام تسجيل الخروج التلقائي عند الخمول
+// ==========================================
+let idleTimeout;
+const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; // ساعتين (بالميلي ثانية)
+
+// دالة تصفير العداد
+function resetIdleTimer() {
+    // نقوم بتشغيل العداد فقط إذا كان المستخدم مسجل الدخول بالفعل
+    if (localStorage.getItem('loggedInUser')) {
+        clearTimeout(idleTimeout);
+        idleTimeout = setTimeout(autoLogout, IDLE_TIME_LIMIT);
+    }
+}
+
+// دالة الخروج التلقائي التي ستعمل عند انتهاء الساعتين
+function autoLogout() {
+    alert("⏳ تم تسجيل الخروج تلقائياً نظراً لعدم وجود نشاط لمدة ساعتين.");
+    logout();
+}
+
+// مراقبة نشاط المستخدم (حركة ماوس، كيبورد، نقر، سكرول) لتصفير العداد
+document.addEventListener('mousemove', resetIdleTimer);
+document.addEventListener('keypress', resetIdleTimer);
+document.addEventListener('click', resetIdleTimer);
+document.addEventListener('scroll', resetIdleTimer);
+// ==========================================
+
 window.onload = function() {
     let loggedInUser = localStorage.getItem('loggedInUser');
     if (loggedInUser) {
         document.getElementById("loginPage").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
         showPage("revenue");
+        resetIdleTimer(); // تشغيل العداد فور فتح الصفحة إذا كان مسجل دخول
     }
     renderUsersList();
 }
@@ -24,6 +53,8 @@ function login() {
         document.getElementById("loginPage").style.display = "none";
         document.getElementById("dashboard").style.display = "block";
         showPage("revenue");
+        
+        resetIdleTimer(); // بدء العداد عند تسجيل الدخول بنجاح
     } else {
         alert("❌ اسم المستخدم أو كلمة المرور غير صحيحة!");
     }
@@ -31,6 +62,8 @@ function login() {
 
 function logout() {
     localStorage.removeItem('loggedInUser');
+    clearTimeout(idleTimeout); // إيقاف العداد عند تسجيل الخروج
+    
     document.getElementById("dashboard").style.display = "none";
     document.getElementById("loginPage").style.display = "block";
     document.getElementById("loginUser").value = "";
@@ -119,7 +152,7 @@ function saveData() {
     let note = document.getElementById("note").value;
 
     let log = {
-        type: "إيراد", // تمييز نوع العملية
+        type: "إيراد", 
         date, employee, revenue, machine, withdraw, note,
         time: new Date().toLocaleString()
     }
@@ -140,7 +173,7 @@ function saveDebt() {
     }
 
     let log = {
-        type: "مديونية", // تمييز نوع العملية
+        type: "مديونية", 
         date: date,
         client: client,
         amount: amount,
@@ -151,7 +184,6 @@ function saveDebt() {
     logs.push(log);
     alert("تم تسجيل المديونية بنجاح ✅");
     
-    // تصفير الحقول بعد الحفظ
     document.getElementById("debtClient").value = "";
     document.getElementById("debtAmount").value = "";
     document.getElementById("debtNote").value = "";
@@ -162,7 +194,6 @@ function showLogs() {
     let container = document.getElementById("logContainer");
     container.innerHTML = "";
     
-    // عكس المصفوفة لكي يظهر أحدث تعديل في الأعلى
     let reversedLogs = [...logs].reverse();
 
     reversedLogs.forEach(l => {
@@ -170,7 +201,6 @@ function showLogs() {
         div.className = "log-item";
         
         if (l.type === "إيراد") {
-            // شكل سجل الإيراد (خط جانبي أخضر)
             div.style.borderRight = "5px solid #2ecc71";
             div.innerHTML = `
                 <strong style="color: #2ecc71;">[إيراد جديد]</strong><br>
@@ -181,7 +211,6 @@ function showLogs() {
                 <small style="color:gray;">الوقت: ${l.time}</small>
             `;
         } else if (l.type === "مديونية") {
-            // شكل سجل المديونية (خط جانبي أحمر)
             div.style.borderRight = "5px solid #e74c3c";
             div.innerHTML = `
                 <strong style="color: #e74c3c;">[مديونية جديدة]</strong><br>
