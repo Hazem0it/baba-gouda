@@ -1,5 +1,5 @@
-// ⚠️ ضع الرابط الذي نسخته من جوجل هنا
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhOGM86D4k63mINQRLrd9tsyza4upTdm952U2lwo5m8WwAdDOYrha80NAalzLQwUwmag/exec"; 
+// ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEQE_IHOcdwC6B4EcvOyJqP15usTgAepfMoTSIqV1tu1544KPu0UOi6IJwOkSYQlxZtg/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
@@ -10,7 +10,7 @@ applyTheme(currentTheme);
 // نظام تسجيل الخروج التلقائي
 // ==========================================
 let idleTimeout;
-const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; // ساعتين
+const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; 
 
 function resetIdleTimer() {
     if (localStorage.getItem('loggedInUser')) {
@@ -75,7 +75,7 @@ function showPage(page) {
 }
 
 // ==========================================
-// جلب البيانات (الرئيسية واللوج)
+// جلب البيانات
 // ==========================================
 async function loadTotals() {
     if(!GOOGLE_SCRIPT_URL.startsWith("http")) return;
@@ -99,7 +99,7 @@ async function loadTotals() {
 }
 
 // ==========================================
-// نظام الإيراد المتقدم (استدعاء وحفظ ورفع ملف)
+// نظام الإيراد المتقدم
 // ==========================================
 function getBase64(file) {
    return new Promise((resolve, reject) => {
@@ -115,10 +115,13 @@ async function checkExistingData() {
     let date = document.getElementById("date").value;
     let employee = document.getElementById("employee").value;
     let statusText = document.getElementById("checkStatus");
+    let existingReceiptContainer = document.getElementById("existingReceiptContainer");
+    let existingReceiptLink = document.getElementById("existingReceiptLink");
 
     if(date && employee) {
         statusText.innerText = "⏳ جاري فحص السجلات السابقة...";
         statusText.style.color = "#f39c12";
+        existingReceiptContainer.style.display = "none"; 
 
         let dataToSend = { action: "checkRevenue", year: year, date: date, employee: employee };
 
@@ -138,6 +141,11 @@ async function checkExistingData() {
                 document.getElementById("machine").value = result.data.machine || "";
                 document.getElementById("withdraw").value = result.data.withdraw || "";
                 document.getElementById("note").value = result.data.note || "";
+                
+                if(result.data.receiptUrl) {
+                    existingReceiptContainer.style.display = "block";
+                    existingReceiptLink.href = result.data.receiptUrl;
+                }
             } else {
                 statusText.innerText = "✨ هذا اليوم جديد ولم يُسجل فيه شيء بعد لهذا الموظف.";
                 statusText.style.color = "#3498db";
@@ -145,6 +153,7 @@ async function checkExistingData() {
                 document.getElementById("machine").value = "";
                 document.getElementById("withdraw").value = "";
                 document.getElementById("note").value = "";
+                existingReceiptContainer.style.display = "none";
             }
         } catch(error) {
             statusText.innerText = "";
@@ -160,6 +169,7 @@ async function saveData() {
     let machine = document.getElementById("machine").value;
     let withdraw = document.getElementById("withdraw").value;
     let note = document.getElementById("note").value;
+    let receiptName = document.getElementById("receiptName").value;
     
     let fileInput = document.getElementById("receipt");
     let file = fileInput.files[0];
@@ -176,7 +186,7 @@ async function saveData() {
     let originalText = btn.innerText;
     
     if (file) {
-        btn.innerText = "⏳ جاري التجهيز ورفع الإيصال...";
+        btn.innerText = "⏳ جاري التجهيز ورفع الإيصال في الفولدر...";
         fileName = file.name;
         fileMimeType = file.type;
         fileBase64 = await getBase64(file);
@@ -189,6 +199,7 @@ async function saveData() {
     let dataToSend = { 
         action: "addRevenue", year: year, date: date, employee: employee, 
         revenue: revenue, machine: machine, withdraw: withdraw, note: note,
+        receiptName: receiptName, 
         fileName: fileName, fileMimeType: fileMimeType, fileBase64: fileBase64
     };
 
@@ -211,7 +222,9 @@ async function saveData() {
             document.getElementById("withdraw").value = "";
             document.getElementById("note").value = "";
             document.getElementById("receipt").value = "";
+            document.getElementById("receiptName").value = "";
             document.getElementById("checkStatus").innerText = "";
+            document.getElementById("existingReceiptContainer").style.display = "none";
 
             loadTotals(); 
         } else {
