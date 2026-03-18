@@ -1,5 +1,5 @@
 // ⚠️ ضع الرابط الذي نسخته من جوجل هنا
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz3W8E2cLelGgnPWPsvVrO0V4NXHnqc9rACSbqXOEKoCrGLIK8mLlfn7QlrAM0HGyZC5Q/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhOGM86D4k63mINQRLrd9tsyza4upTdm952U2lwo5m8WwAdDOYrha80NAalzLQwUwmag/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
