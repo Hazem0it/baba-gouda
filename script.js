@@ -1,5 +1,5 @@
-// ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbhnRCDvFWVfxHfH9d8qy-a-gcyHjsPZHzS5hmYAX2qmbRCJq3SH27OB14QrlwHxu7/exec"; 
+// ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا بين علامتي التنصيص
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxltcXCt5Epre4iFoRl4bbu6U_iD3Md6VdXSMm2c2_UQBAwCJPsL07HbW4Ar1VxOVk4_g/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
@@ -99,7 +99,7 @@ async function loadTotals() {
 }
 
 // ==========================================
-// نظام الإيراد المتقدم
+// نظام الإيراد المتقدم ورفع الملفات
 // ==========================================
 function getBase64(file) {
    return new Promise((resolve, reject) => {
@@ -161,6 +161,7 @@ async function checkExistingData() {
     }
 }
 
+// الدالة المحدثة لمنع التعليق
 async function saveData() {
     let year = document.getElementById("year").value;
     let date = document.getElementById("date").value;
@@ -184,26 +185,25 @@ async function saveData() {
 
     let btn = document.querySelector("#revenue .btn-primary");
     let originalText = btn.innerText;
-    
-    if (file) {
-        btn.innerText = "⏳ جاري التجهيز ورفع الإيصال في الفولدر...";
-        fileName = file.name;
-        fileMimeType = file.type;
-        fileBase64 = await getBase64(file);
-    } else {
-        btn.innerText = "⏳ جاري الحفظ في السحابة...";
-    }
-    
     btn.disabled = true;
 
-    let dataToSend = { 
-        action: "addRevenue", year: year, date: date, employee: employee, 
-        revenue: revenue, machine: machine, withdraw: withdraw, note: note,
-        receiptName: receiptName, 
-        fileName: fileName, fileMimeType: fileMimeType, fileBase64: fileBase64
-    };
-
     try {
+        if (file) {
+            btn.innerText = "⏳ جاري التجهيز ورفع الإيصال... (قد يستغرق بعض الوقت)";
+            fileName = file.name;
+            fileMimeType = file.type;
+            fileBase64 = await getBase64(file);
+        } else {
+            btn.innerText = "⏳ جاري الحفظ في السحابة...";
+        }
+
+        let dataToSend = { 
+            action: "addRevenue", year: year, date: date, employee: employee, 
+            revenue: revenue, machine: machine, withdraw: withdraw, note: note,
+            receiptName: receiptName, 
+            fileName: fileName, fileMimeType: fileMimeType, fileBase64: fileBase64
+        };
+
         let response = await fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             redirect: "follow",
@@ -212,6 +212,7 @@ async function saveData() {
         });
         
         let result = await response.json();
+        
         if(result.status === "success") {
             alert("تم حفظ وتحديث الإيراد بنجاح ✅");
             
@@ -231,10 +232,13 @@ async function saveData() {
             alert("❌ فشل الحفظ: " + result.message);
         }
     } catch(error) {
-        alert("❌ خطأ في الاتصال بالسيرفر.");
+        console.error(error);
+        alert("❌ حدث خطأ أثناء الرفع! تأكد أن حجم الملف ليس ضخماً، أو تأكد من عمل (إصدار جديد) للرابط في جوجل.");
+    } finally {
+        // إرجاع الزرار لشكله الطبيعي في كل الحالات (سواء نجح أو فشل)
+        btn.innerText = originalText;
+        btn.disabled = false;
     }
-    btn.innerText = originalText;
-    btn.disabled = false;
 }
 
 // ==========================================
