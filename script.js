@@ -1,4 +1,4 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwoxpwxJkIkpaf7xbBHpIwxbQXmWuFglfYPGoixwVAv0V6m7BT-iCzzCqKIZAfKkIKKqw/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEl2KRmWWuc3O23btyKQgo_5AyYcO78NOQ8QzcQlZHjZ2w0B_4xwWSNUoDfzvpG88P/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
