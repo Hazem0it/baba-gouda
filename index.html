@@ -96,15 +96,11 @@
                     <input type="text" id="note">
                 </div>
                 <div class="form-group">
-                    <label>اسم الإيصال (اختياري)</label>
-                    <input type="text" id="receiptName" placeholder="إذا تُرك فارغاً سيتم تسميته بالتاريخ">
-                </div>
-                <div class="form-group">
-                    <label>رفع ايصال PDF أو صورة</label>
-                    <input type="file" id="receipt" accept=".pdf,image/*">
+                    <label>رفع إيصال أو صورة (يمكنك تحديد أكثر من ملف)</label>
+                    <input type="file" id="receipt" accept=".pdf,image/*" multiple>
+                    
                     <div id="existingReceiptContainer" style="display:none; margin-top: 15px; background: #e8f4f8; padding: 10px; border-radius: 5px; text-align: center;">
-                        <a href="#" id="existingReceiptLink" target="_blank" style="color: #2980b9; font-weight: bold; text-decoration: none; font-size: 14px;">📄 اضغط هنا لعرض الإيصال المسجل حالياً</a>
-                    </div>
+                        </div>
                 </div>
             </div>
             <button class="btn-primary" onclick="saveData()">حفظ الإيراد وتحديث البيانات</button>
