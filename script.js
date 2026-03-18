@@ -1,4 +1,5 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEl2KRmWWuc3O23btyKQgo_5AyYcO78NOQ8QzcQlZHjZ2w0B_4xwWSNUoDfzvpG88P/exec"; 
+// ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLCzngOZ-T8Lb4tS6VUNcKSgfleSpBP6DBz-HwQNuahRDiQQ4BE-jv7gDlohK8CvhNyg/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
@@ -124,7 +125,11 @@ async function checkExistingData() {
                 statusText.innerText = "✅ تم جلب البيانات السابقة لهذا اليوم.. يمكنك تعديلها أو إضافة مرفقات.";
                 statusText.style.color = "#2ecc71";
                 document.getElementById("revenueValue").value = result.data.revenue || "";
-                document.getElementById("machine").value = result.data.machine || "";
+                
+                // تعبئة حقل الماكينة القديم وتفريغ حقل الإضافة
+                document.getElementById("machineOld").value = result.data.machine || "0";
+                document.getElementById("machineAdd").value = "";
+
                 document.getElementById("withdraw").value = result.data.withdraw || "";
                 document.getElementById("note").value = result.data.note || "";
                 
@@ -142,7 +147,8 @@ async function checkExistingData() {
                 statusText.innerText = "✨ هذا اليوم جديد ولم يُسجل فيه شيء بعد لهذا الموظف.";
                 statusText.style.color = "#3498db";
                 document.getElementById("revenueValue").value = "";
-                document.getElementById("machine").value = "";
+                document.getElementById("machineOld").value = "0";
+                document.getElementById("machineAdd").value = "";
                 document.getElementById("withdraw").value = "";
                 document.getElementById("note").value = "";
                 existingReceiptContainer.style.display = "none";
@@ -159,10 +165,9 @@ async function saveData() {
     let date = document.getElementById("date").value;
     let employee = document.getElementById("employee").value;
     let revenue = document.getElementById("revenueValue").value;
-    let machine = document.getElementById("machine").value;
+    let machineAdd = document.getElementById("machineAdd").value; 
     let withdraw = document.getElementById("withdraw").value;
     let note = document.getElementById("note").value;
-    let receiptName = document.getElementById("receiptName").value;
     
     let fileInput = document.getElementById("receipt");
     let files = fileInput.files;
@@ -194,8 +199,8 @@ async function saveData() {
 
         let dataToSend = { 
             action: "addRevenue", year: year, date: date, employee: employee, 
-            revenue: revenue, machine: machine, withdraw: withdraw, note: note,
-            receiptName: receiptName,
+            revenue: revenue, machineAdd: machineAdd, 
+            withdraw: withdraw, note: note,
             files: filesArray 
         };
 
@@ -214,11 +219,11 @@ async function saveData() {
             document.getElementById("date").value = "";
             document.getElementById("employee").value = "";
             document.getElementById("revenueValue").value = "";
-            document.getElementById("machine").value = "";
+            document.getElementById("machineOld").value = "";
+            document.getElementById("machineAdd").value = "";
             document.getElementById("withdraw").value = "";
             document.getElementById("note").value = "";
             document.getElementById("receipt").value = "";
-            document.getElementById("receiptName").value = "";
             document.getElementById("checkStatus").innerText = "";
             document.getElementById("existingReceiptContainer").style.display = "none";
 
@@ -281,11 +286,15 @@ async function saveDebt() {
     btn.disabled = false;
 }
 
-function showLogs() {
+// دالة اللوج تم تحديثها لجلب البيانات فوراً قبل العرض
+async function showLogs() {
     showPage("logs");
     let container = document.getElementById("logContainer");
-    container.innerHTML = "";
+    container.innerHTML = "<p style='text-align:center;'>⏳ جاري تحميل أحدث السجلات...</p>";
     
+    await loadTotals(); // نجبر الموقع يجلب الداتا الطازة من الإكسيل
+    
+    container.innerHTML = "";
     let reversedLogs = [...logs].reverse();
 
     if(reversedLogs.length === 0) {
@@ -304,12 +313,14 @@ function showLogs() {
 
         if (String(l.type).includes("إيراد")) {
             div.style.borderRight = "5px solid #2ecc71";
+            let revText = l.amount ? `الايراد: ${l.amount}` : "الايراد: (بدون تعديل)";
+            let withText = l.withdraw ? `السحب: ${l.withdraw}` : "السحب: (بدون تعديل)";
             div.innerHTML = `
                 <strong style="color: #2ecc71;">[${l.type}]</strong><br>
                 التاريخ: ${displayDate}<br>
                 الموظف: ${l.name}<br>
-                الايراد: ${l.amount} | السحب: ${l.withdraw || "0"}<br>
-                الملاحظة: ${l.note}<br>
+                ${revText} | ${withText}<br>
+                تفاصيل إضافية: <span style="color:#f39c12; font-weight:bold;">${l.note || "لا يوجد"}</span><br>
                 <small style="color:gray;">وقت التسجيل: ${l.time}</small>
             `;
         } else {
