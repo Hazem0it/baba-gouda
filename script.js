@@ -1,14 +1,10 @@
-// ⚠️ ضع الرابط الخاص بجوجل شيت هنا
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvmU5ED7sqpY0yS-XW-sSJ6Pp13wzg_Hh2LtRiLFnYt1SGuqB7GZKSBkFR1UTd9KG6zw/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwoxpwxJkIkpaf7xbBHpIwxbQXmWuFglfYPGoixwVAv0V6m7BT-iCzzCqKIZAfKkIKKqw/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
 let currentTheme = localStorage.getItem('systemTheme') || 'light';
 applyTheme(currentTheme);
 
-// ==========================================
-// نظام تسجيل الخروج التلقائي
-// ==========================================
 let idleTimeout;
 const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; 
 
@@ -71,9 +67,6 @@ function showPage(page) {
     document.getElementById(page).style.display = "block";
 }
 
-// ==========================================
-// جلب البيانات
-// ==========================================
 async function loadTotals() {
     if(!GOOGLE_SCRIPT_URL.startsWith("http")) return;
     try {
@@ -95,9 +88,6 @@ async function loadTotals() {
     }
 }
 
-// ==========================================
-// نظام الإيراد (دعم رفع ملفات متعددة)
-// ==========================================
 function getBase64(file) {
    return new Promise((resolve, reject) => {
      const reader = new FileReader();
@@ -138,7 +128,6 @@ async function checkExistingData() {
                 document.getElementById("withdraw").value = result.data.withdraw || "";
                 document.getElementById("note").value = result.data.note || "";
                 
-                // عرض المرفقات المتعددة تحت بعض
                 if(result.data.receiptUrls && result.data.receiptUrls.length > 0) {
                     existingReceiptContainer.style.display = "block";
                     existingReceiptContainer.innerHTML = "<strong style='color:#2c3e50;'>📄 المرفقات المسجلة:</strong><br>";
@@ -173,8 +162,8 @@ async function saveData() {
     let machine = document.getElementById("machine").value;
     let withdraw = document.getElementById("withdraw").value;
     let note = document.getElementById("note").value;
+    let receiptName = document.getElementById("receiptName").value;
     
-    // تم إزالة قراءة "receiptName" من هنا لحل مشكلة توقف الزرار
     let fileInput = document.getElementById("receipt");
     let files = fileInput.files;
     let filesArray = [];
@@ -206,6 +195,7 @@ async function saveData() {
         let dataToSend = { 
             action: "addRevenue", year: year, date: date, employee: employee, 
             revenue: revenue, machine: machine, withdraw: withdraw, note: note,
+            receiptName: receiptName,
             files: filesArray 
         };
 
@@ -228,6 +218,7 @@ async function saveData() {
             document.getElementById("withdraw").value = "";
             document.getElementById("note").value = "";
             document.getElementById("receipt").value = "";
+            document.getElementById("receiptName").value = "";
             document.getElementById("checkStatus").innerText = "";
             document.getElementById("existingReceiptContainer").style.display = "none";
 
@@ -244,9 +235,6 @@ async function saveData() {
     }
 }
 
-// ==========================================
-// المديونية
-// ==========================================
 async function saveDebt() {
     let date = document.getElementById("debtDate").value;
     let client = document.getElementById("debtClient").value; 
@@ -293,9 +281,6 @@ async function saveDebt() {
     btn.disabled = false;
 }
 
-// ==========================================
-// اللوج وإعدادات المستخدم
-// ==========================================
 function showLogs() {
     showPage("logs");
     let container = document.getElementById("logContainer");
