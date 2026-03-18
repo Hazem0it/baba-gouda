@@ -1,4 +1,4 @@
-// ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا بين علامتي التنصيص
+// ⚠️ ضع الرابط الخاص بجوجل شيت هنا
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvmU5ED7sqpY0yS-XW-sSJ6Pp13wzg_Hh2LtRiLFnYt1SGuqB7GZKSBkFR1UTd9KG6zw/exec"; 
 
 let logs = [];
@@ -29,9 +29,6 @@ document.addEventListener('keypress', resetIdleTimer);
 document.addEventListener('click', resetIdleTimer);
 document.addEventListener('scroll', resetIdleTimer);
 
-// ==========================================
-// الدخول والتنقل
-// ==========================================
 window.onload = function() {
     let loggedInUser = localStorage.getItem('loggedInUser');
     if (loggedInUser) {
@@ -99,7 +96,7 @@ async function loadTotals() {
 }
 
 // ==========================================
-// نظام الإيراد المتقدم ورفع الملفات
+// نظام الإيراد (دعم رفع ملفات متعددة)
 // ==========================================
 function getBase64(file) {
    return new Promise((resolve, reject) => {
@@ -116,7 +113,6 @@ async function checkExistingData() {
     let employee = document.getElementById("employee").value;
     let statusText = document.getElementById("checkStatus");
     let existingReceiptContainer = document.getElementById("existingReceiptContainer");
-    let existingReceiptLink = document.getElementById("existingReceiptLink");
 
     if(date && employee) {
         statusText.innerText = "⏳ جاري فحص السجلات السابقة...";
@@ -135,16 +131,23 @@ async function checkExistingData() {
             let result = await response.json();
 
             if(result.status === "success") {
-                statusText.innerText = "✅ تم جلب البيانات السابقة لهذا اليوم.. يمكنك تعديلها.";
+                statusText.innerText = "✅ تم جلب البيانات السابقة لهذا اليوم.. يمكنك تعديلها أو إضافة مرفقات.";
                 statusText.style.color = "#2ecc71";
                 document.getElementById("revenueValue").value = result.data.revenue || "";
                 document.getElementById("machine").value = result.data.machine || "";
                 document.getElementById("withdraw").value = result.data.withdraw || "";
                 document.getElementById("note").value = result.data.note || "";
                 
-                if(result.data.receiptUrl) {
+                // عرض المرفقات المتعددة تحت بعض
+                if(result.data.receiptUrls && result.data.receiptUrls.length > 0) {
                     existingReceiptContainer.style.display = "block";
-                    existingReceiptLink.href = result.data.receiptUrl;
+                    existingReceiptContainer.innerHTML = "<strong style='color:#2c3e50;'>📄 المرفقات المسجلة:</strong><br>";
+                    result.data.receiptUrls.forEach((url, index) => {
+                        existingReceiptContainer.innerHTML += `<a href="${url}" target="_blank" style="display:block; margin-top:8px; color:#2980b9; text-decoration:none; font-weight:bold;">🔗 عرض المرفق ${index + 1}</a>`;
+                    });
+                } else {
+                    existingReceiptContainer.style.display = "none";
+                    existingReceiptContainer.innerHTML = "";
                 }
             } else {
                 statusText.innerText = "✨ هذا اليوم جديد ولم يُسجل فيه شيء بعد لهذا الموظف.";
@@ -154,6 +157,7 @@ async function checkExistingData() {
                 document.getElementById("withdraw").value = "";
                 document.getElementById("note").value = "";
                 existingReceiptContainer.style.display = "none";
+                existingReceiptContainer.innerHTML = "";
             }
         } catch(error) {
             statusText.innerText = "";
@@ -161,7 +165,6 @@ async function checkExistingData() {
     }
 }
 
-// الدالة المحدثة لمنع التعليق
 async function saveData() {
     let year = document.getElementById("year").value;
     let date = document.getElementById("date").value;
@@ -170,13 +173,11 @@ async function saveData() {
     let machine = document.getElementById("machine").value;
     let withdraw = document.getElementById("withdraw").value;
     let note = document.getElementById("note").value;
-    let receiptName = document.getElementById("receiptName").value;
     
+    // تم إزالة قراءة "receiptName" من هنا لحل مشكلة توقف الزرار
     let fileInput = document.getElementById("receipt");
-    let file = fileInput.files[0];
-    let fileBase64 = null;
-    let fileName = null;
-    let fileMimeType = null;
+    let files = fileInput.files;
+    let filesArray = [];
 
     if(!date || !employee) {
         alert("⚠️ يرجى إدخال التاريخ واسم الموظف على الأقل!");
@@ -188,11 +189,16 @@ async function saveData() {
     btn.disabled = true;
 
     try {
-        if (file) {
-            btn.innerText = "⏳ جاري التجهيز ورفع الإيصال... (قد يستغرق بعض الوقت)";
-            fileName = file.name;
-            fileMimeType = file.type;
-            fileBase64 = await getBase64(file);
+        if (files.length > 0) {
+            btn.innerText = `⏳ جاري التجهيز ورفع ${files.length} ملف... (برجاء الانتظار قليلاً)`;
+            for(let i=0; i<files.length; i++) {
+                let base64 = await getBase64(files[i]);
+                filesArray.push({
+                    name: files[i].name,
+                    mimeType: files[i].type,
+                    base64: base64
+                });
+            }
         } else {
             btn.innerText = "⏳ جاري الحفظ في السحابة...";
         }
@@ -200,8 +206,7 @@ async function saveData() {
         let dataToSend = { 
             action: "addRevenue", year: year, date: date, employee: employee, 
             revenue: revenue, machine: machine, withdraw: withdraw, note: note,
-            receiptName: receiptName, 
-            fileName: fileName, fileMimeType: fileMimeType, fileBase64: fileBase64
+            files: filesArray 
         };
 
         let response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -214,7 +219,7 @@ async function saveData() {
         let result = await response.json();
         
         if(result.status === "success") {
-            alert("تم حفظ وتحديث الإيراد بنجاح ✅");
+            alert("تم الحفظ بنجاح ✅");
             
             document.getElementById("date").value = "";
             document.getElementById("employee").value = "";
@@ -223,7 +228,6 @@ async function saveData() {
             document.getElementById("withdraw").value = "";
             document.getElementById("note").value = "";
             document.getElementById("receipt").value = "";
-            document.getElementById("receiptName").value = "";
             document.getElementById("checkStatus").innerText = "";
             document.getElementById("existingReceiptContainer").style.display = "none";
 
@@ -233,9 +237,8 @@ async function saveData() {
         }
     } catch(error) {
         console.error(error);
-        alert("❌ حدث خطأ أثناء الرفع! تأكد أن حجم الملف ليس ضخماً، أو تأكد من عمل (إصدار جديد) للرابط في جوجل.");
+        alert("❌ حدث خطأ أثناء الرفع! تأكد من اتصال الإنترنت.");
     } finally {
-        // إرجاع الزرار لشكله الطبيعي في كل الحالات (سواء نجح أو فشل)
         btn.innerText = originalText;
         btn.disabled = false;
     }
