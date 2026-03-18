@@ -20,7 +20,7 @@
         <button onclick="showPage('home')">الرئيسية 🏠</button>
         <button onclick="showPage('revenue')">تسجيل الايراد 💰</button>
         <button onclick="showPage('debt')">المديونية 📝</button>
-        <button onclick="showPage('logs')">لوج التعديلات 📊</button>
+        <button onclick="showLogs()">لوج التعديلات 📊</button>
         <button onclick="showPage('settings')">الإعدادات ⚙️</button>
         <button onclick="logout()" style="background: #e74c3c; margin-top: 40px;">تسجيل الخروج 🚪</button>
     </div>
@@ -83,10 +83,15 @@
                     <label>الايراد</label>
                     <input type="number" id="revenueValue" placeholder="قيمة الإيراد">
                 </div>
+                
                 <div class="form-group">
                     <label>شحن الماكينه</label>
-                    <input type="number" id="machine">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="machineOld" placeholder="الرصيد الحالي" disabled style="background:#e0e0e0; width: 50%; color: #333; font-weight: bold;" title="الرصيد المسجل مسبقاً لهذا اليوم">
+                        <input type="number" id="machineAdd" placeholder="+ إضافة شحن" style="width: 50%; border: 2px solid #3498db;" title="أدخل الرقم المراد إضافته للرصيد">
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label>السحب</label>
                     <input type="number" id="withdraw">
@@ -94,10 +99,6 @@
                 <div class="form-group">
                     <label>الملاحظة</label>
                     <input type="text" id="note">
-                </div>
-                <div class="form-group">
-                    <label>اسم الإيصال (اختياري)</label>
-                    <input type="text" id="receiptName" placeholder="مثال: رقم الفاتورة (أو يترك فارغاً للتاريخ)">
                 </div>
                 <div class="form-group">
                     <label>رفع إيصال أو صورة (يمكنك تحديد أكثر من ملف)</label>
