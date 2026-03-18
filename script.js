@@ -1,5 +1,5 @@
 // ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا بين علامتي التنصيص
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJbqDPpyeAPBTsiz6LdsO3DSLMKGVOuiSz9U6mr6hyRh0lT_bB_3EQd5uAdhKINFAWxw/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvmU5ED7sqpY0yS-XW-sSJ6Pp13wzg_Hh2LtRiLFnYt1SGuqB7GZKSBkFR1UTd9KG6zw/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
