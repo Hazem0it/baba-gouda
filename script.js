@@ -1,5 +1,5 @@
 // ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-Wxp86h2wQKqgRjrKeZ9frO9JxpSUPBR8n8WIGCteo4GeaOSiWameqedJT55i-AzJXA/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNnR8TrbdEPMZwPNkxogHCx_vm4gsmy5GusiTXy1ppVBUpRDgVVWTd8L3TkQrIP3rnbw/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
@@ -68,6 +68,34 @@ function showPage(page) {
     document.getElementById(page).style.display = "block";
 }
 
+// دالة لتحديث الأرقام وتطبيق نظام الإخفاء
+function updateStatValue(id, value) {
+    let el = document.getElementById(id);
+    if(el) {
+        el.setAttribute('data-val', value);
+        // لو النص الحالي عبارة عن أرقام ظاهرة سيبها ظاهرة وحدثها، غير كده خليها نجوم مخفية
+        if(el.innerText !== '****' && el.innerText !== 'جاري التحميل...') {
+            el.innerText = value;
+        } else {
+            el.innerText = '****'; // الإخفاء الافتراضي
+        }
+    }
+}
+
+// دالة لإظهار وإخفاء الرقم عند الضغط على العين
+function toggleVisibility(id, iconEl) {
+    let el = document.getElementById(id);
+    if(!el || !el.hasAttribute('data-val') || el.getAttribute('data-val') === "") return; 
+    
+    if (el.innerText === '****') {
+        el.innerText = el.getAttribute('data-val');
+        iconEl.innerText = '🙈'; // عين مغمضة (معناها اضغط للإخفاء)
+    } else {
+        el.innerText = '****';
+        iconEl.innerText = '👁️'; // عين مفتوحة (معناها اضغط للإظهار)
+    }
+}
+
 async function loadTotals() {
     if(!GOOGLE_SCRIPT_URL.startsWith("http")) return;
     try {
@@ -75,12 +103,11 @@ async function loadTotals() {
         let result = await response.json();
         
         if(result.status === "success") {
-            document.getElementById("total-refaat").innerText = result.data["رفعت"];
-            document.getElementById("total-mohamed").innerText = result.data["محمد"];
-            document.getElementById("total-mahmoud").innerText = result.data["محمود"];
-            document.getElementById("total-hazem").innerText = result.data["حازم"];
-            let totalAll = document.getElementById("total-all");
-            if(totalAll) totalAll.innerText = result.data["المجموع"];
+            updateStatValue("total-refaat", result.data["رفعت"]);
+            updateStatValue("total-mohamed", result.data["محمد"]);
+            updateStatValue("total-mahmoud", result.data["محمود"]);
+            updateStatValue("total-hazem", result.data["حازم"]);
+            updateStatValue("total-all", result.data["المجموع"]);
 
             logs = result.logs || []; 
         }
