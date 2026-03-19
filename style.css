@@ -69,7 +69,7 @@ body {
     float: right; 
     padding: 20px;
     box-sizing: border-box;
-    position: fixed; /* لتثبيت القائمة الجانبية */
+    position: fixed; 
     right: 0;
     top: 0;
 }
@@ -98,7 +98,7 @@ body {
 }
 
 .content {
-    margin-right: 220px; /* ترك مساحة للقائمة الجانبية */
+    margin-right: 220px; 
     padding: 30px;
 }
 
@@ -187,7 +187,6 @@ button {
     background: #c0392b;
 }
 
-/* تنسيق الصفحة الرئيسية والمجاميع */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -214,4 +213,17 @@ button {
     font-weight: bold;
     color: #e74c3c; 
     margin: 0;
+}
+
+/* تنسيق أيقونة العين لتكون كأنها زرار */
+.eye-btn {
+    cursor: pointer;
+    margin-right: 8px;
+    font-size: 18px;
+    user-select: none;
+    transition: opacity 0.2s;
+}
+
+.eye-btn:hover {
+    opacity: 0.6;
 }
