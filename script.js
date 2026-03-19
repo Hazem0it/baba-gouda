@@ -1,5 +1,5 @@
 // ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzLCzngOZ-T8Lb4tS6VUNcKSgfleSpBP6DBz-HwQNuahRDiQQ4BE-jv7gDlohK8CvhNyg/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz-Wxp86h2wQKqgRjrKeZ9frO9JxpSUPBR8n8WIGCteo4GeaOSiWameqedJT55i-AzJXA/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
@@ -126,7 +126,6 @@ async function checkExistingData() {
                 statusText.style.color = "#2ecc71";
                 document.getElementById("revenueValue").value = result.data.revenue || "";
                 
-                // تعبئة حقل الماكينة القديم وتفريغ حقل الإضافة
                 document.getElementById("machineOld").value = result.data.machine || "0";
                 document.getElementById("machineAdd").value = "";
 
@@ -286,13 +285,12 @@ async function saveDebt() {
     btn.disabled = false;
 }
 
-// دالة اللوج تم تحديثها لجلب البيانات فوراً قبل العرض
 async function showLogs() {
     showPage("logs");
     let container = document.getElementById("logContainer");
     container.innerHTML = "<p style='text-align:center;'>⏳ جاري تحميل أحدث السجلات...</p>";
     
-    await loadTotals(); // نجبر الموقع يجلب الداتا الطازة من الإكسيل
+    await loadTotals(); 
     
     container.innerHTML = "";
     let reversedLogs = [...logs].reverse();
@@ -313,14 +311,20 @@ async function showLogs() {
 
         if (String(l.type).includes("إيراد")) {
             div.style.borderRight = "5px solid #2ecc71";
-            let revText = l.amount ? `الايراد: ${l.amount}` : "الايراد: (بدون تعديل)";
-            let withText = l.withdraw ? `السحب: ${l.withdraw}` : "السحب: (بدون تعديل)";
+            let revText = l.amount ? `الايراد: <span style="color:#2ecc71; font-weight:bold;">${l.amount}</span>` : "";
+            let withText = l.withdraw ? `السحب: <span style="color:#e74c3c; font-weight:bold;">${l.withdraw}</span>` : "";
+            let separator = (revText && withText) ? " | " : "";
+            
+            let detailsHtml = "";
+            if (l.note && l.note.trim() !== "") {
+                detailsHtml = `<br><span style="color:#8e44ad; font-weight:bold;">⚙️ التغييرات:</span> ${l.note}`;
+            }
+
             div.innerHTML = `
-                <strong style="color: #2ecc71;">[${l.type}]</strong><br>
+                <strong style="color: #2ecc71;">[${l.type}]</strong> - الموظف: <strong>${l.name}</strong><br>
                 التاريخ: ${displayDate}<br>
-                الموظف: ${l.name}<br>
-                ${revText} | ${withText}<br>
-                تفاصيل إضافية: <span style="color:#f39c12; font-weight:bold;">${l.note || "لا يوجد"}</span><br>
+                ${revText} ${separator} ${withText}
+                ${detailsHtml}<br>
                 <small style="color:gray;">وقت التسجيل: ${l.time}</small>
             `;
         } else {
