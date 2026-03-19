@@ -9,8 +9,8 @@
 
 <div class="login-page" id="loginPage">
     <h2>تسجيل الدخول</h2>
-    <input type="text" id="loginUser" placeholder="اسم المستخدم">
-    <input type="password" id="loginPass" placeholder="كلمة المرور">
+    <input type="text" id="loginUser" placeholder="اسم المستخدم" onkeypress="if(event.key === 'Enter') login()">
+    <input type="password" id="loginPass" placeholder="كلمة المرور" onkeypress="if(event.key === 'Enter') login()">
     <button onclick="login()">دخول</button>
 </div>
 
@@ -30,24 +30,24 @@
             <h2>الصفحة الرئيسية - ملخص المديونيات</h2>
             <div class="stats-grid">
                 <div class="stat-card" style="border-top-color: #f39c12; grid-column: 1 / -1;">
-                    <h3>المجموع الكلي 💰</h3>
-                    <p id="total-all" style="color: #f39c12; font-size: 28px;">جاري التحميل...</p>
+                    <h3>المجموع الكلي 💰 <span class="eye-btn" onclick="toggleVisibility('total-all', this)">👁️</span></h3>
+                    <p id="total-all" style="color: #f39c12; font-size: 28px;" data-val="">جاري التحميل...</p>
                 </div>
                 <div class="stat-card">
-                    <h3>رفعت</h3>
-                    <p id="total-refaat">جاري التحميل...</p>
+                    <h3>رفعت <span class="eye-btn" onclick="toggleVisibility('total-refaat', this)">👁️</span></h3>
+                    <p id="total-refaat" data-val="">جاري التحميل...</p>
                 </div>
                 <div class="stat-card">
-                    <h3>محمد</h3>
-                    <p id="total-mohamed">جاري التحميل...</p>
+                    <h3>محمد <span class="eye-btn" onclick="toggleVisibility('total-mohamed', this)">👁️</span></h3>
+                    <p id="total-mohamed" data-val="">جاري التحميل...</p>
                 </div>
                 <div class="stat-card">
-                    <h3>محمود</h3>
-                    <p id="total-mahmoud">جاري التحميل...</p>
+                    <h3>محمود <span class="eye-btn" onclick="toggleVisibility('total-mahmoud', this)">👁️</span></h3>
+                    <p id="total-mahmoud" data-val="">جاري التحميل...</p>
                 </div>
                 <div class="stat-card">
-                    <h3>حازم</h3>
-                    <p id="total-hazem">جاري التحميل...</p>
+                    <h3>حازم <span class="eye-btn" onclick="toggleVisibility('total-hazem', this)">👁️</span></h3>
+                    <p id="total-hazem" data-val="">جاري التحميل...</p>
                 </div>
             </div>
             <button class="btn-primary" onclick="loadTotals()" style="margin-top: 20px;">تحديث الأرقام 🔄</button>
@@ -83,7 +83,6 @@
                     <label>الايراد</label>
                     <input type="number" id="revenueValue" placeholder="قيمة الإيراد">
                 </div>
-                
                 <div class="form-group">
                     <label>شحن الماكينه</label>
                     <div style="display: flex; gap: 10px;">
@@ -91,7 +90,6 @@
                         <input type="number" id="machineAdd" placeholder="+ إضافة شحن" style="width: 50%; border: 2px solid #3498db;" title="أدخل الرقم المراد إضافته للرصيد">
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>السحب</label>
                     <input type="number" id="withdraw">
@@ -105,7 +103,7 @@
                     <input type="file" id="receipt" accept=".pdf,image/*" multiple>
                     
                     <div id="existingReceiptContainer" style="display:none; margin-top: 15px; background: #e8f4f8; padding: 10px; border-radius: 5px; text-align: center;">
-                        </div>
+                    </div>
                 </div>
             </div>
             <button class="btn-primary" onclick="saveData()">حفظ الإيراد وتحديث البيانات</button>
