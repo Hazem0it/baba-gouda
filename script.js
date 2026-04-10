@@ -9,6 +9,9 @@ applyTheme(currentTheme);
 let idleTimeout;
 const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; 
 
+// قائمة الموظفين لتسجيل الإيراد
+const EMPLOYEE_NAMES = ["رفعت", "محمد", "حازم", "عمر", "ساره", "ريهام"];
+
 function resetIdleTimer() {
     if (localStorage.getItem('loggedInUser')) {
         clearTimeout(idleTimeout);
@@ -73,11 +76,10 @@ function updateStatValue(id, value) {
     let el = document.getElementById(id);
     if(el) {
         el.setAttribute('data-val', value);
-        // لو النص الحالي عبارة عن أرقام ظاهرة سيبها ظاهرة وحدثها، غير كده خليها نجوم مخفية
         if(el.innerText !== '****' && el.innerText !== 'جاري التحميل...') {
             el.innerText = value;
         } else {
-            el.innerText = '****'; // الإخفاء الافتراضي
+            el.innerText = '****'; 
         }
     }
 }
@@ -89,10 +91,10 @@ function toggleVisibility(id, iconEl) {
     
     if (el.innerText === '****') {
         el.innerText = el.getAttribute('data-val');
-        iconEl.innerText = '🙈'; // عين مغمضة (معناها اضغط للإخفاء)
+        iconEl.innerText = '🙈'; 
     } else {
         el.innerText = '****';
-        iconEl.innerText = '👁️'; // عين مفتوحة (معناها اضغط للإظهار)
+        iconEl.innerText = '👁️'; 
     }
 }
 
@@ -125,92 +127,129 @@ function getBase64(file) {
    });
 }
 
-async function checkExistingData() {
+async function loadAllEmployeesData() {
     let year = document.getElementById("year").value;
     let date = document.getElementById("date").value;
-    let employee = document.getElementById("employee").value;
+    let container = document.getElementById("allEmployeesContainer");
     let statusText = document.getElementById("checkStatus");
-    let existingReceiptContainer = document.getElementById("existingReceiptContainer");
+    let saveBtn = document.getElementById("saveAllBtn");
 
-    if(date && employee) {
-        statusText.innerText = "⏳ جاري فحص السجلات السابقة...";
-        statusText.style.color = "#f39c12";
-        existingReceiptContainer.style.display = "none"; 
+    if(!date) return; 
 
-        let dataToSend = { action: "checkRevenue", year: year, date: date, employee: employee };
+    statusText.innerText = "⏳ جاري فحص السجلات السابقة لجميع الموظفين... برجاء الانتظار";
+    statusText.style.color = "#f39c12";
+    container.innerHTML = "";
+    saveBtn.style.display = "none";
 
-        try {
-            let response = await fetch(GOOGLE_SCRIPT_URL, {
+    try {
+        let promises = EMPLOYEE_NAMES.map(emp => {
+            let dataToSend = { action: "checkRevenue", year: year, date: date, employee: emp };
+            return fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 redirect: "follow",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify(dataToSend)
-            });
-            let result = await response.json();
+            }).then(res => res.json()).then(result => ({ emp, result })).catch(() => ({ emp, result: { status: "error" } }));
+        });
 
-            if(result.status === "success") {
-                statusText.innerText = "✅ تم جلب البيانات السابقة لهذا اليوم.. يمكنك تعديلها أو إضافة مرفقات.";
-                statusText.style.color = "#2ecc71";
-                document.getElementById("revenueValue").value = result.data.revenue || "";
-                
-                document.getElementById("machineOld").value = result.data.machine || "0";
-                document.getElementById("machineAdd").value = "";
+        let results = await Promise.all(promises);
 
-                document.getElementById("withdraw").value = result.data.withdraw || "";
-                document.getElementById("note").value = result.data.note || "";
-                
-                if(result.data.receiptUrls && result.data.receiptUrls.length > 0) {
-                    existingReceiptContainer.style.display = "block";
-                    existingReceiptContainer.innerHTML = "<strong style='color:#2c3e50;'>📄 المرفقات المسجلة:</strong><br>";
-                    result.data.receiptUrls.forEach((url, index) => {
-                        existingReceiptContainer.innerHTML += `<a href="${url}" target="_blank" style="display:block; margin-top:8px; color:#2980b9; text-decoration:none; font-weight:bold;">🔗 عرض المرفق ${index + 1}</a>`;
-                    });
-                } else {
-                    existingReceiptContainer.style.display = "none";
-                    existingReceiptContainer.innerHTML = "";
-                }
-            } else {
-                statusText.innerText = "✨ هذا اليوم جديد ولم يُسجل فيه شيء بعد لهذا الموظف.";
-                statusText.style.color = "#3498db";
-                document.getElementById("revenueValue").value = "";
-                document.getElementById("machineOld").value = "0";
-                document.getElementById("machineAdd").value = "";
-                document.getElementById("withdraw").value = "";
-                document.getElementById("note").value = "";
-                existingReceiptContainer.style.display = "none";
-                existingReceiptContainer.innerHTML = "";
-            }
-        } catch(error) {
-            statusText.innerText = "";
-        }
+        statusText.innerText = "✅ تم جلب البيانات. يمكنك الآن التعديل عليهم جميعاً.";
+        statusText.style.color = "#2ecc71";
+        saveBtn.style.display = "block";
+
+        results.forEach(item => {
+            renderEmployeeBlock(item.emp, item.result);
+        });
+
+    } catch (error) {
+        statusText.innerText = "❌ حدث خطأ أثناء جلب البيانات.";
+        statusText.style.color = "#e74c3c";
     }
 }
 
-async function saveData() {
+function renderEmployeeBlock(empName, result) {
+    let container = document.getElementById("allEmployeesContainer");
+    
+    let data = (result.status === "success" && result.data) ? result.data : {};
+    
+    let revVal = data.revenue || "";
+    let macOld = data.machine || "0";
+    let withVal = data.withdraw || "";
+    let noteVal = data.note || "";
+    
+    let receiptsHtml = "";
+    if(data.receiptUrls && data.receiptUrls.length > 0) {
+        receiptsHtml = `<div style="margin-top: 10px; background: #e8f4f8; padding: 5px; border-radius: 5px; text-align: center;"><strong style="color:#2c3e50;">المرفقات السابقة:</strong><br>`;
+        data.receiptUrls.forEach((url, index) => {
+            receiptsHtml += `<a href="${url}" target="_blank" style="margin: 0 5px; color:#2980b9; text-decoration:none; font-weight:bold;">🔗 ${index + 1}</a>`;
+        });
+        receiptsHtml += `</div>`;
+    }
+
+    let block = document.createElement("div");
+    block.className = "employee-record-block";
+    block.dataset.emp = empName;
+    block.innerHTML = `
+        <div style="background: var(--bg-card); padding: 20px; margin-bottom: 20px; border-radius: 8px; border-right: 5px solid #3498db; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <h3 style="margin-top:0; color:var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">👤 ${empName}</h3>
+            <div class="form-grid" style="margin-bottom: 0; box-shadow: none; padding: 0; background: transparent;">
+                <div class="form-group">
+                    <label>الايراد</label>
+                    <input type="number" class="emp-revenue" placeholder="قيمة الإيراد" value="${revVal}">
+                </div>
+                <div class="form-group">
+                    <label>شحن الماكينه</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" class="emp-mac-old" value="${macOld}" disabled style="background:#e0e0e0; width: 50%; color: #333; font-weight: bold;">
+                        <input type="number" class="emp-mac-add" placeholder="+ إضافة شحن" style="width: 50%; border: 2px solid #3498db;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>السحب</label>
+                    <input type="number" class="emp-withdraw" value="${withVal}">
+                </div>
+                <div class="form-group">
+                    <label>الملاحظة</label>
+                    <input type="text" class="emp-note" value="${noteVal}">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>رفع إيصال (يمكن تحديد أكثر من ملف)</label>
+                    <input type="file" class="emp-receipt" accept=".pdf,image/*" multiple>
+                    ${receiptsHtml}
+                </div>
+            </div>
+        </div>
+    `;
+    container.appendChild(block);
+}
+
+async function saveAllEmployeesData() {
     let year = document.getElementById("year").value;
     let date = document.getElementById("date").value;
-    let employee = document.getElementById("employee").value;
-    let revenue = document.getElementById("revenueValue").value;
-    let machineAdd = document.getElementById("machineAdd").value; 
-    let withdraw = document.getElementById("withdraw").value;
-    let note = document.getElementById("note").value;
     
-    let fileInput = document.getElementById("receipt");
-    let files = fileInput.files;
-    let filesArray = [];
-
-    if(!date || !employee) {
-        alert("⚠️ يرجى إدخال التاريخ واسم الموظف على الأقل!");
+    if(!date) {
+        alert("⚠️ يرجى إدخال التاريخ!");
         return;
     }
 
-    let btn = document.querySelector("#revenue .btn-primary");
+    let blocks = document.querySelectorAll(".employee-record-block");
+    let activeRequests = [];
+    let btn = document.getElementById("saveAllBtn");
     let originalText = btn.innerText;
-    btn.disabled = true;
 
-    try {
-        if (files.length > 0) {
-            btn.innerText = `⏳ جاري التجهيز ورفع ${files.length} ملف... (برجاء الانتظار قليلاً)`;
+    for (let block of blocks) {
+        let employee = block.dataset.emp;
+        let revenue = block.querySelector(".emp-revenue").value;
+        let machineAdd = block.querySelector(".emp-mac-add").value;
+        let withdraw = block.querySelector(".emp-withdraw").value;
+        let note = block.querySelector(".emp-note").value;
+        let fileInput = block.querySelector(".emp-receipt");
+        let files = fileInput.files;
+        
+        if(revenue !== "" || machineAdd !== "" || withdraw !== "" || note !== "" || files.length > 0) {
+            
+            let filesArray = [];
             for(let i=0; i<files.length; i++) {
                 let base64 = await getBase64(files[i]);
                 filesArray.push({
@@ -219,46 +258,36 @@ async function saveData() {
                     base64: base64
                 });
             }
-        } else {
-            btn.innerText = "⏳ جاري الحفظ في السحابة...";
+
+            activeRequests.push({ 
+                action: "addRevenue", year: year, date: date, employee: employee, 
+                revenue: revenue, machineAdd: machineAdd, withdraw: withdraw, note: note, files: filesArray 
+            });
         }
+    }
 
-        let dataToSend = { 
-            action: "addRevenue", year: year, date: date, employee: employee, 
-            revenue: revenue, machineAdd: machineAdd, 
-            withdraw: withdraw, note: note,
-            files: filesArray 
-        };
+    if(activeRequests.length === 0) {
+        alert("⚠️ لا توجد بيانات جديدة أو معدلة للحفظ!");
+        return;
+    }
 
-        let response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            redirect: "follow",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(dataToSend)
-        });
-        
-        let result = await response.json();
-        
-        if(result.status === "success") {
-            alert("تم الحفظ بنجاح ✅");
-            
-            document.getElementById("date").value = "";
-            document.getElementById("employee").value = "";
-            document.getElementById("revenueValue").value = "";
-            document.getElementById("machineOld").value = "";
-            document.getElementById("machineAdd").value = "";
-            document.getElementById("withdraw").value = "";
-            document.getElementById("note").value = "";
-            document.getElementById("receipt").value = "";
-            document.getElementById("checkStatus").innerText = "";
-            document.getElementById("existingReceiptContainer").style.display = "none";
+    btn.innerText = `⏳ جاري حفظ بيانات ${activeRequests.length} موظفين في السحابة... (قد يستغرق بعض الوقت)`;
+    btn.disabled = true;
 
-            loadTotals(); 
-        } else {
-            alert("❌ فشل الحفظ: " + result.message);
+    try {
+        for (let reqData of activeRequests) {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                redirect: "follow",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(reqData)
+            });
         }
+        
+        alert("تم حفظ بيانات جميع الموظفين بنجاح ✅");
+        loadAllEmployeesData(); 
+        loadTotals(); 
     } catch(error) {
-        console.error(error);
         alert("❌ حدث خطأ أثناء الرفع! تأكد من اتصال الإنترنت.");
     } finally {
         btn.innerText = originalText;
