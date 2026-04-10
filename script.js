@@ -153,7 +153,7 @@ async function loadAllEmployeesData() {
         let empResult = await empResponse.json();
         
         if(empResult.status === "success" && empResult.data.length > 0) {
-            EMPLOYEE_NAMES = empResult.data; // الأسماء اتحدثت أوتوماتيك!
+            EMPLOYEE_NAMES = empResult.data; 
         } else {
             statusText.innerText = "❌ لم يتم العثور على موظفين في شيت هذه السنة.";
             statusText.style.color = "#e74c3c";
@@ -208,43 +208,57 @@ function renderEmployeeBlock(empName, result) {
     
     let receiptsHtml = "";
     if(data.receiptUrls && data.receiptUrls.length > 0) {
-        receiptsHtml = `<div style="margin-top: 10px; background: #e8f4f8; padding: 5px; border-radius: 5px; text-align: center;"><strong style="color:#2c3e50;">المرفقات السابقة:</strong><br>`;
+        receiptsHtml = `<div style="margin-top: 15px; background: #e8f4f8; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #bde0fe;">
+            <strong style="color:#2c3e50;">📄 المرفقات السابقة:</strong><br>
+            <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:8px;">`;
         data.receiptUrls.forEach((url, index) => {
-            receiptsHtml += `<a href="${url}" target="_blank" style="margin: 0 5px; color:#2980b9; text-decoration:none; font-weight:bold;">🔗 ${index + 1}</a>`;
+            receiptsHtml += `<a href="${url}" target="_blank" style="background:#2980b9; color:white; padding:5px 15px; border-radius:20px; text-decoration:none; font-size:14px; box-shadow:0 2px 4px rgba(0,0,0,0.2);">🔗 عرض المرفق ${index + 1}</a>`;
         });
-        receiptsHtml += `</div>`;
+        receiptsHtml += `</div></div>`;
     }
 
     let block = document.createElement("div");
     block.className = "employee-record-block";
     block.dataset.emp = empName;
+    
+    // التصميم الجديد للكارت
     block.innerHTML = `
-        <div style="background: var(--bg-card); padding: 20px; margin-bottom: 20px; border-radius: 8px; border-right: 5px solid #3498db; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-            <h3 style="margin-top:0; color:var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">👤 ${empName}</h3>
-            <div class="form-grid" style="margin-bottom: 0; box-shadow: none; padding: 0; background: transparent;">
-                <div class="form-group">
-                    <label>الايراد</label>
-                    <input type="number" class="emp-revenue" placeholder="قيمة الإيراد" value="${revVal}">
-                </div>
-                <div class="form-group">
-                    <label>شحن الماكينه</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="number" class="emp-mac-old" value="${macOld}" disabled style="background:#e0e0e0; width: 50%; color: #333; font-weight: bold;">
-                        <input type="number" class="emp-mac-add" placeholder="+ إضافة شحن" style="width: 50%; border: 2px solid #3498db;">
+        <div class="employee-card">
+            <div class="employee-header">
+                <span style="font-size: 22px;">👨‍💼</span>
+                <h3>الموظف: ${empName}</h3>
+            </div>
+            
+            <div class="employee-body">
+                <div class="emp-form-grid">
+                    <div class="form-group">
+                        <label>💰 قيمة الإيراد</label>
+                        <input type="number" class="emp-revenue" placeholder="0" value="${revVal}">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>السحب</label>
-                    <input type="number" class="emp-withdraw" value="${withVal}">
-                </div>
-                <div class="form-group">
-                    <label>الملاحظة</label>
-                    <input type="text" class="emp-note" value="${noteVal}">
-                </div>
-                <div class="form-group" style="grid-column: 1 / -1;">
-                    <label>رفع إيصال (يمكن تحديد أكثر من ملف)</label>
-                    <input type="file" class="emp-receipt" accept=".pdf,image/*" multiple>
-                    ${receiptsHtml}
+                    
+                    <div class="form-group">
+                        <label>💳 شحن الماكينة</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="number" class="emp-mac-old" value="${macOld}" disabled style="background:#e9ecef; width: 45%; color: #6c757d; font-weight: bold; text-align:center; border: 1px solid #ced4da;" title="الرصيد التراكمي السابق">
+                            <input type="number" class="emp-mac-add" placeholder="+ إضافة شحن" style="width: 55%; border: 2px solid #3498db; text-align:center;">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📉 السحب</label>
+                        <input type="number" class="emp-withdraw" placeholder="0" value="${withVal}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📝 الملاحظة</label>
+                        <input type="text" class="emp-note" placeholder="اكتب تفاصيل إضافية هنا..." value="${noteVal}">
+                    </div>
+                    
+                    <div class="form-group file-upload-wrapper">
+                        <label style="display:block; margin-bottom:10px; color:#7f8c8d; font-weight:bold;">📎 إرفاق إيصالات (اضغط هنا لاختيار الملفات)</label>
+                        <input type="file" class="emp-receipt" accept=".pdf,image/*" multiple style="border:none; background:transparent; width: 100%; cursor: pointer;">
+                        ${receiptsHtml}
+                    </div>
                 </div>
             </div>
         </div>
