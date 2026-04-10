@@ -54,60 +54,26 @@
         </div>
 
         <div id="revenue" class="page">
-            <h2>تسجيل الايراد</h2>
-            <div class="form-grid">
+            <h2>تسجيل الايراد لجميع الموظفين</h2>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group">
                     <label>السنة</label>
-                    <select id="year" onchange="checkExistingData()">
+                    <select id="year" onchange="loadAllEmployeesData()">
                         <option>2026</option>
                         <option>2027</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>التاريخ</label>
-                    <input type="date" id="date" onchange="checkExistingData()">
-                </div>
-                <div class="form-group">
-                    <label>اسم الموظف</label>
-                    <select id="employee" onchange="checkExistingData()">
-                        <option value="">اختر الموظف...</option>
-                        <option>رفعت</option>
-                        <option>محمد</option>
-                        <option>حازم</option>
-                        <option>عمر</option>
-                        <option>ساره</option>
-                        <option>ريهام</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>الايراد</label>
-                    <input type="number" id="revenueValue" placeholder="قيمة الإيراد">
-                </div>
-                <div class="form-group">
-                    <label>شحن الماكينه</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="number" id="machineOld" placeholder="الرصيد الحالي" disabled style="background:#e0e0e0; width: 50%; color: #333; font-weight: bold;" title="الرصيد المسجل مسبقاً لهذا اليوم">
-                        <input type="number" id="machineAdd" placeholder="+ إضافة شحن" style="width: 50%; border: 2px solid #3498db;" title="أدخل الرقم المراد إضافته للرصيد">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>السحب</label>
-                    <input type="number" id="withdraw">
-                </div>
-                <div class="form-group">
-                    <label>الملاحظة</label>
-                    <input type="text" id="note">
-                </div>
-                <div class="form-group">
-                    <label>رفع إيصال أو صورة (يمكنك تحديد أكثر من ملف)</label>
-                    <input type="file" id="receipt" accept=".pdf,image/*" multiple>
-                    
-                    <div id="existingReceiptContainer" style="display:none; margin-top: 15px; background: #e8f4f8; padding: 10px; border-radius: 5px; text-align: center;">
-                    </div>
+                    <input type="date" id="date" onchange="loadAllEmployeesData()">
                 </div>
             </div>
-            <button class="btn-primary" onclick="saveData()">حفظ الإيراد وتحديث البيانات</button>
-            <p id="checkStatus" style="color: #e74c3c; font-weight: bold; font-size: 14px; margin-top: 10px;"></p>
+            
+            <p id="checkStatus" style="text-align:center; font-weight:bold; font-size: 16px; margin-bottom: 20px;"></p>
+            
+            <div id="allEmployeesContainer"></div>
+
+            <button class="btn-primary" id="saveAllBtn" onclick="saveAllEmployeesData()" style="width: 100%; font-size: 18px; padding: 15px; display: none; margin-top: 20px;">حفظ وتحديث بيانات جميع الموظفين 💾</button>
         </div>
 
         <div id="debt" class="page">
