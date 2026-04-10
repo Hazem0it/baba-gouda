@@ -1,5 +1,5 @@
-// ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-ZhD-aVQn4s5cUqETMKFCz0T3Y0BqoMXo-v3kI9j1HEzf7W_owqXIlpRMIEc1JCk8Qw/exec"; 
+// ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا (بعد عمل New Deployment)
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby29MJ3szAuOaDvtLlDYRbUcTisy3xeY4l_VO0C8meuCtYpTi_5HKrgonIwiWwbb9cJ2A/exec"; 
 
 let logs = [];
 let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
@@ -9,8 +9,8 @@ applyTheme(currentTheme);
 let idleTimeout;
 const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; 
 
-// قائمة الموظفين لتسجيل الإيراد
-const EMPLOYEE_NAMES = ["رفعت", "محمد", "حازم", "عمر", "ساره", "ريهام"];
+// قائمة الموظفين بقت ديناميكية (هتتملي من جوجل شيت)
+let EMPLOYEE_NAMES = [];
 
 function resetIdleTimer() {
     if (localStorage.getItem('loggedInUser')) {
@@ -71,7 +71,6 @@ function showPage(page) {
     document.getElementById(page).style.display = "block";
 }
 
-// دالة لتحديث الأرقام وتطبيق نظام الإخفاء
 function updateStatValue(id, value) {
     let el = document.getElementById(id);
     if(el) {
@@ -84,7 +83,6 @@ function updateStatValue(id, value) {
     }
 }
 
-// دالة لإظهار وإخفاء الرقم عند الضغط على العين
 function toggleVisibility(id, iconEl) {
     let el = document.getElementById(id);
     if(!el || !el.hasAttribute('data-val') || el.getAttribute('data-val') === "") return; 
@@ -136,10 +134,40 @@ async function loadAllEmployeesData() {
 
     if(!date) return; 
 
+    // إخفاء الزرار وتفريغ الشاشة لحد ما نجيب الداتا
+    saveBtn.style.display = "none";
+    container.innerHTML = "";
+
+    // الخطوة الأولى: جلب أسماء الموظفين من الشيت ديناميكياً
+    statusText.innerText = "⏳ جاري قراءة أسماء الموظفين من الشيت...";
+    statusText.style.color = "#3498db";
+
+    try {
+        let empResponse = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "getEmployees", year: year })
+        });
+        
+        let empResult = await empResponse.json();
+        
+        if(empResult.status === "success" && empResult.data.length > 0) {
+            EMPLOYEE_NAMES = empResult.data; // الأسماء اتحدثت أوتوماتيك!
+        } else {
+            statusText.innerText = "❌ لم يتم العثور على موظفين في شيت هذه السنة.";
+            statusText.style.color = "#e74c3c";
+            return;
+        }
+    } catch (error) {
+        statusText.innerText = "❌ حدث خطأ أثناء الاتصال بجوجل شيت لجلب الأسماء.";
+        statusText.style.color = "#e74c3c";
+        return;
+    }
+
+    // الخطوة الثانية: جلب بيانات كل موظف
     statusText.innerText = "⏳ جاري فحص السجلات السابقة لجميع الموظفين... برجاء الانتظار";
     statusText.style.color = "#f39c12";
-    container.innerHTML = "";
-    saveBtn.style.display = "none";
 
     try {
         let promises = EMPLOYEE_NAMES.map(emp => {
@@ -163,7 +191,7 @@ async function loadAllEmployeesData() {
         });
 
     } catch (error) {
-        statusText.innerText = "❌ حدث خطأ أثناء جلب البيانات.";
+        statusText.innerText = "❌ حدث خطأ أثناء جلب بيانات الإيراد.";
         statusText.style.color = "#e74c3c";
     }
 }
