@@ -215,7 +215,6 @@ button {
     margin: 0;
 }
 
-/* تنسيق أيقونة العين لتكون كأنها زرار */
 .eye-btn {
     cursor: pointer;
     margin-right: 8px;
@@ -226,4 +225,84 @@ button {
 
 .eye-btn:hover {
     opacity: 0.6;
+}
+
+/* =========================================
+   تنسيقات كروت الموظفين الجديدة (شكل احترافي)
+   ========================================= */
+.employee-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.employee-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.employee-header {
+    background: #f8f9fa; 
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-right: 5px solid #2e86de; /* خط أزرق شيك على اليمين */
+}
+
+body.dark-theme .employee-header {
+    background: #252525;
+}
+
+.employee-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+body.dark-theme .employee-header h3 {
+    color: #e0e0e0;
+}
+
+.employee-body {
+    padding: 20px;
+}
+
+.emp-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    align-items: end;
+}
+
+/* تعديل شكل مربع رفع الملفات ليكون Dashed */
+.file-upload-wrapper {
+    grid-column: 1 / -1; /* يمتد بعرض الشاشة */
+    background: #f8f9fa;
+    border: 2px dashed #bdc3c7;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+body.dark-theme .file-upload-wrapper {
+    background: #1e1e1e;
+    border-color: #555;
+}
+
+.file-upload-wrapper:hover {
+    border-color: #2e86de;
+    background: #f1f8ff;
+}
+
+body.dark-theme .file-upload-wrapper:hover {
+    background: #2a3b4c;
 }
