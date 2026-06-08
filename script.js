@@ -1,13 +1,18 @@
 // ⚠️ ضع الرابط الجديد الخاص بجوجل شيت هنا (بعد عمل New Deployment)
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmzEOPoZbep-cSd8Oi2-4-qBezk09HdO0TFOS8MBmleQuU-du75sFJsRu5e839TaoaZw/exec"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmzEOPoZbep-cSd8Oi2-4-qBezk09HdO0TFOS8MBmleQuU-du75sFJsRu5e839TaoaZw/exec";
 
 let logs = [];
-let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "1234" };
+
+// التعديل: إجبار النظام على تحديث كلمة مرور الأدمن في متصفحك إلى 123 فوراً
+let users = JSON.parse(localStorage.getItem('systemUsers')) || {};
+users["admin"] = "123";
+localStorage.setItem('systemUsers', JSON.stringify(users));
+
 let currentTheme = localStorage.getItem('systemTheme') || 'light';
 applyTheme(currentTheme);
 
 let idleTimeout;
-const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000; 
+const IDLE_TIME_LIMIT = 2 * 60 * 60 * 1000;
 
 // قائمة الموظفين بقت ديناميكية (هتتملي من جوجل شيت)
 let EMPLOYEE_NAMES = [];
@@ -78,21 +83,21 @@ function updateStatValue(id, value) {
         if(el.innerText !== '****' && el.innerText !== 'جاري التحميل...') {
             el.innerText = value;
         } else {
-            el.innerText = '****'; 
+            el.innerText = '****';
         }
     }
 }
 
 function toggleVisibility(id, iconEl) {
     let el = document.getElementById(id);
-    if(!el || !el.hasAttribute('data-val') || el.getAttribute('data-val') === "") return; 
+    if(!el || !el.hasAttribute('data-val') || el.getAttribute('data-val') === "") return;
     
     if (el.innerText === '****') {
         el.innerText = el.getAttribute('data-val');
-        iconEl.innerText = '🙈'; 
+        iconEl.innerText = '🙈';
     } else {
         el.innerText = '****';
-        iconEl.innerText = '👁️'; 
+        iconEl.innerText = '👁️';
     }
 }
 
@@ -109,7 +114,7 @@ async function loadTotals() {
             updateStatValue("total-hazem", result.data["حازم"]);
             updateStatValue("total-all", result.data["المجموع"]);
 
-            logs = result.logs || []; 
+            logs = result.logs || [];
         }
     } catch (error) {
         console.error("خطأ في الاتصال:", error);
@@ -132,7 +137,7 @@ async function loadAllEmployeesData() {
     let statusText = document.getElementById("checkStatus");
     let saveBtn = document.getElementById("saveAllBtn");
 
-    if(!date) return; 
+    if(!date) return;
 
     // إخفاء الزرار وتفريغ الشاشة لحد ما نجيب الداتا
     saveBtn.style.display = "none";
@@ -153,7 +158,7 @@ async function loadAllEmployeesData() {
         let empResult = await empResponse.json();
         
         if(empResult.status === "success" && empResult.data.length > 0) {
-            EMPLOYEE_NAMES = empResult.data; 
+            EMPLOYEE_NAMES = empResult.data;
         } else {
             statusText.innerText = "❌ لم يتم العثور على موظفين في شيت هذه السنة.";
             statusText.style.color = "#e74c3c";
@@ -302,8 +307,8 @@ async function saveAllEmployeesData() {
             }
 
             activeRequests.push({ 
-                action: "addRevenue", year: year, date: date, employee: employee, 
-                revenue: revenue, machineAdd: machineAdd, withdraw: withdraw, note: note, files: filesArray 
+                action: "addRevenue", year: year, date: date, employee: employee,
+                revenue: revenue, machineAdd: machineAdd, withdraw: withdraw, note: note, files: filesArray
             });
         }
     }
@@ -327,8 +332,8 @@ async function saveAllEmployeesData() {
         }
         
         alert("تم حفظ بيانات جميع الموظفين بنجاح ✅");
-        loadAllEmployeesData(); 
-        loadTotals(); 
+        loadAllEmployeesData();
+        loadTotals();
     } catch(error) {
         alert("❌ حدث خطأ أثناء الرفع! تأكد من اتصال الإنترنت.");
     } finally {
@@ -339,7 +344,7 @@ async function saveAllEmployeesData() {
 
 async function saveDebt() {
     let date = document.getElementById("debtDate").value;
-    let client = document.getElementById("debtClient").value; 
+    let client = document.getElementById("debtClient").value;
     let amount = document.getElementById("debtAmount").value;
     let note = document.getElementById("debtNote").value;
 
@@ -372,7 +377,7 @@ async function saveDebt() {
             document.getElementById("debtAmount").value = "";
             document.getElementById("debtNote").value = "";
 
-            loadTotals(); 
+            loadTotals();
         } else {
             alert("❌ فشل الحفظ: " + result.message);
         }
@@ -388,7 +393,7 @@ async function showLogs() {
     let container = document.getElementById("logContainer");
     container.innerHTML = "<p style='text-align:center;'>⏳ جاري تحميل أحدث السجلات...</p>";
     
-    await loadTotals(); 
+    await loadTotals();
     
     container.innerHTML = "";
     let reversedLogs = [...logs].reverse();
