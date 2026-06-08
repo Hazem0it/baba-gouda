@@ -2,7 +2,7 @@
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmzEOPoZbep-cSd8Oi2-4-qBezk09HdO0TFOS8MBmleQuU-du75sFJsRu5e839TaoaZw/exec"; 
 
 let logs = [];
-let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "123" };
+let users = JSON.parse(localStorage.getItem('systemUsers')) || { "admin": "1234" };
 let currentTheme = localStorage.getItem('systemTheme') || 'light';
 applyTheme(currentTheme);
 
