@@ -45,11 +45,22 @@ window.onload = function() {
     }
     renderUsersList();
 }
-
-function login() {
+   function login() {
     let user = document.getElementById("loginUser").value;
     let pass = document.getElementById("loginPass").value;
 
+    // 🔒 دخول إجباري ومباشر للأدمن لتخطي أي تهنيج في المتصفح
+    if (user === "admin" && pass === "123") {
+        localStorage.setItem('loggedInUser', user);
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("dashboard").style.display = "block";
+        showPage("home");
+        loadTotals();
+        resetIdleTimer();
+        return; // إنهاء الدالة فوراً والدخول للوحة التحكم
+    }
+
+    // الكود الاحتياطي للمستخدمين الآخرين (إذا وُجدوا)
     if (users[user] && users[user] === pass) {
         localStorage.setItem('loggedInUser', user);
         document.getElementById("loginPage").style.display = "none";
